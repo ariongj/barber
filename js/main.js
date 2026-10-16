@@ -146,7 +146,7 @@
     clipper.style.transform = `translate(${x - 19}px, ${y - 8}px) rotate(${angle}deg)`;
   }
   function buzz() {
-    clipper.classList.add("is-buzz");
+    if (!clipper.classList.contains("is-buzz")) clipper.classList.add("is-buzz");
     clearTimeout(buzzTimer);
     buzzTimer = setTimeout(() => clipper.classList.remove("is-buzz"), 120);
   }
@@ -216,21 +216,25 @@
   /* ======================================================================
      Manifesto: words light up as you scroll
      ====================================================================== */
+  const manifesto = $("#manifesto");
+  let mWords = [], mLit = 0;
   function splitManifesto() {
-    const el = $("#manifesto");
-    const words = el.textContent.trim().split(/\s+/);
-    el.innerHTML = words.map((w) => `<span class="w">${esc(w)}</span>`).join(" ");
+    const words = manifesto.textContent.trim().split(/\s+/);
+    manifesto.innerHTML = words.map((w) => `<span class="w">${esc(w)}</span>`).join(" ");
+    mWords = Array.from(manifesto.children);
+    mLit = 0;
     updateManifesto();
   }
   function updateManifesto() {
-    const el = $("#manifesto");
-    const words = el.querySelectorAll(".w");
-    if (!words.length) return;
-    const r = el.getBoundingClientRect();
+    if (!mWords.length) return;
+    const r = manifesto.getBoundingClientRect();
     const vh = innerHeight;
     const p = clamp((vh * 0.85 - r.top) / (r.height + vh * 0.3), 0, 1);
-    const n = Math.round(p * words.length);
-    words.forEach((w, i) => w.classList.toggle("on", i < n));
+    const n = Math.round(p * mWords.length);
+    if (n === mLit) return;
+    const [a, b] = n > mLit ? [mLit, n] : [n, mLit];
+    for (let i = a; i < b; i++) mWords[i].classList.toggle("on", i < n);
+    mLit = n;
   }
 
   /* ======================================================================
@@ -305,8 +309,12 @@
     $("#labMin").textContent = `${q.min} ${t("min")}`;
 
     if (book.service === "lab") { renderSlots(); renderTicket(); }
-    if (labTouched) renderSvc();
+    if (labTouched) {
+      clearTimeout(svcTimer);
+      svcTimer = setTimeout(renderSvc, 150);
+    }
   }
+  let svcTimer;
 
   function touchLab() {
     labTouched = true;
@@ -809,17 +817,15 @@
      ====================================================================== */
   function setupPointerFx() {
     if (!finePointer || reduceMotion) return;
+    let mag = null;
     document.addEventListener("pointermove", (e) => {
-      const m = e.target.closest("[data-magnetic]");
-      if (m) {
-        const r = m.getBoundingClientRect();
-        const dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2);
-        m.style.transform = `translate(${dx * 0.18}px, ${dy * 0.28}px)`;
-        m.dataset.mag = "1";
-      }
-      $$("[data-mag]").forEach((el) => {
-        if (el !== m) { el.style.transform = ""; delete el.dataset.mag; }
-      });
+      const m = e.target.closest ? e.target.closest("[data-magnetic]") : null;
+      if (mag && mag !== m) mag.style.transform = "";
+      mag = m;
+      if (!m) return;
+      const r = m.getBoundingClientRect();
+      const dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2);
+      m.style.transform = `translate(${dx * 0.18}px, ${dy * 0.28}px)`;
     }, { passive: true });
 
     $$("[data-tilt]").forEach((card) => {
@@ -842,28 +848,38 @@
   const poleFill = $("#poleFill");
   const ticker = $("#ticker");
   const finaleWord = $(".finale__word");
-  let lastY = scrollY, velocity = 0, tickX = 0, tickerOn = true;
+  let lastY = scrollY, velocity = 0, tickX = 0, tickerOn = false, tickerRunning = false;
+  let heroH = hero.offsetHeight, maxScroll = 1, manifestoOn = false, finaleOn = false, headerHidden = false, poleOn = false;
+  const measure = () => {
+    heroH = hero.offsetHeight;
+    maxScroll = Math.max(1, document.documentElement.scrollHeight - innerHeight);
+  };
+  window.addEventListener("resize", () => { measure(); onScroll(); }, { passive: true });
+  window.addEventListener("load", measure);
+  if ("ResizeObserver" in window) new ResizeObserver(measure).observe(document.body);
 
   function onScroll() {
+    // reads
     const y = scrollY;
     const dy = y - lastY;
     lastY = y;
     velocity += dy;
+    const fr = finaleOn ? finaleWord.getBoundingClientRect() : null;
+    if (manifestoOn) updateManifesto();
 
-    const heroH = hero.offsetHeight;
+    // writes
     const menuOpen = document.body.classList.contains("menu-open");
-    header.classList.toggle("is-hidden", !menuOpen && y > heroH * 0.6 && dy > 4);
-    if (dy < -4 || y < heroH * 0.6) header.classList.remove("is-hidden");
+    let hide = headerHidden;
+    if (!menuOpen && y > heroH * 0.6 && dy > 4) hide = true;
+    if (dy < -4 || y < heroH * 0.6 || menuOpen) hide = false;
+    if (hide !== headerHidden) { headerHidden = hide; header.classList.toggle("is-hidden", hide); }
 
-    const max = document.documentElement.scrollHeight - innerHeight;
-    poleFill.style.height = (max > 0 ? (y / max) * 100 : 0) + "%";
-    poleFill.style.backgroundPosition = `0 ${-y * 0.25}px`;
-    pole.classList.toggle("is-on", y > heroH * 0.5);
+    poleFill.style.transform = `translate3d(0, ${(1 - clamp(y / maxScroll, 0, 1)) * 100}%, 0)`;
+    const on = y > heroH * 0.5;
+    if (on !== poleOn) { poleOn = on; pole.classList.toggle("is-on", on); }
 
-    updateManifesto();
-
-    const fr = finaleWord.getBoundingClientRect();
-    if (fr.top < innerHeight && fr.bottom > 0) finaleWord.style.setProperty("--fy", `${(fr.top - innerHeight) * -0.12}px`);
+    if (fr) finaleWord.style.transform = `translate3d(0, ${(fr.top - innerHeight) * -0.12}px, 0)`;
+    if (tickerOn) startTicker();
   }
   let scrollRaf = 0;
   window.addEventListener("scroll", () => {
@@ -871,19 +887,27 @@
     scrollRaf = requestAnimationFrame(() => { scrollRaf = 0; onScroll(); });
   }, { passive: true });
 
+  let tickerHalf = 0;
+  function startTicker() {
+    if (tickerRunning || reduceMotion || !tickerOn) return;
+    tickerRunning = true;
+    tickerHalf = ticker.scrollWidth / 2;
+    requestAnimationFrame(tickerLoop);
+  }
   function tickerLoop() {
-    if (tickerOn && !reduceMotion) {
+    if (!tickerOn) { tickerRunning = false; return; }
+    {
       velocity *= 0.9;
       const boost = clamp(Math.abs(velocity) * 0.06, 0, 8);
       const dir = velocity < -2 ? -1 : 1;
       tickX -= (0.7 + boost) * dir;
-      const half = ticker.scrollWidth / 2;
+      const half = tickerHalf;
       if (half) {
         if (-tickX >= half) tickX += half;
         if (tickX > 0) tickX -= half;
       }
       const skew = clamp(velocity * 0.04, -8, 8);
-      ticker.style.transform = `translateX(${tickX}px) skewX(${-skew}deg)`;
+      ticker.style.transform = `translate3d(${tickX}px, 0, 0) skewX(${-skew.toFixed(2)}deg)`;
     }
     requestAnimationFrame(tickerLoop);
   }
@@ -920,7 +944,9 @@
     }, { rootMargin: "-45% 0px -50% 0px" });
     ["lab", "lookbook", "menu", "visit"].forEach((id) => spy.observe(document.getElementById(id)));
 
-    new IntersectionObserver(([e]) => { tickerOn = e.isIntersecting; }).observe($(".ticker"));
+    new IntersectionObserver(([e]) => { tickerOn = e.isIntersecting; startTicker(); }).observe($(".ticker"));
+    new IntersectionObserver(([e]) => { manifestoOn = e.isIntersecting; if (manifestoOn) updateManifesto(); }).observe(manifesto);
+    new IntersectionObserver(([e]) => { finaleOn = e.isIntersecting; }).observe(finaleWord);
 
     const dock = $("#dock");
     let heroOut = false, bookIn = false;
@@ -996,8 +1022,8 @@
   applyLang(lang);
   setupObservers();
   injectSchema();
+  measure();
   onScroll();
-  tickerLoop();
   finishLoading();
   setInterval(() => { renderStatus(); renderDial(); }, 60_000);
 })();
