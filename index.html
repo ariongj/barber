@@ -4,15 +4,15 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Privé Hair Studio · Berber në Kosovë</title>
-  <meta name="description" content="Privé Hair Studio: prerje, fade, rregullim mjekre dhe rruajtje me peshqir të nxehtë. Rezervo terminin online, pa pritje." />
-  <meta name="theme-color" content="#0e0d0b" />
+  <meta name="description" content="Privé Hair Studio: fade, prerje klasike, mjekër dhe rruajtje me peshqir të nxehtë. Ndërto prerjen tënde në Fade Lab dhe rezervo online, pa pritje." />
+  <meta name="theme-color" content="#0f0e0d" />
   <link rel="canonical" href="https://ariongj.github.io/barber/" />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Privé Hair Studio" />
   <meta property="og:locale" content="sq_AL" />
   <meta property="og:locale:alternate" content="en_US" />
   <meta property="og:title" content="Privé Hair Studio · Prerje e pastër. Pa pritje." />
-  <meta property="og:description" content="Prerje, fade, mjekër dhe rruajtje me peshqir të nxehtë. Rezervo terminin online." />
+  <meta property="og:description" content="Fade, mjekër dhe rruajtje me peshqir të nxehtë. Ndërto prerjen tënde dhe rezervo online." />
   <meta property="og:url" content="https://ariongj.github.io/barber/" />
   <meta property="og:image" content="https://ariongj.github.io/barber/assets/og.png" />
   <meta property="og:image:width" content="1200" />
@@ -21,34 +21,54 @@
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/styles.css" />
 </head>
-<body>
+<body class="is-loading">
   <a class="skip-link" href="#book" data-i18n="skip">Kalo te rezervimi</a>
 
+  <!-- Loader -->
+  <div class="loader" id="loader" aria-hidden="true">
+    <div class="loader__pole"><span></span></div>
+    <div class="loader__word"><span>P</span><span>R</span><span>I</span><span>V</span><span>É</span></div>
+  </div>
+
+  <!-- Scroll progress: a barber pole -->
+  <div class="pole-progress" aria-hidden="true"><div class="pole-progress__tube"><span id="poleFill"></span></div></div>
+
+  <!-- Clipper cursor for the hero (fine pointers only) -->
+  <div class="clipper" id="clipper" aria-hidden="true">
+    <svg viewBox="0 0 64 120">
+      <rect x="12" y="34" width="40" height="80" rx="16" fill="#efe8dc"/>
+      <rect x="12" y="34" width="40" height="80" rx="16" fill="none" stroke="#0f0e0d" stroke-width="2.5"/>
+      <rect x="20" y="58" width="24" height="5" rx="2.5" fill="#d23b2a"/>
+      <rect x="27" y="74" width="10" height="26" rx="5" fill="#0f0e0d" opacity=".18"/>
+      <path d="M8 34 h48 v-12 h-48 z" fill="#0f0e0d"/>
+      <g fill="#c9c2b6"><rect x="10" y="6" width="4" height="16"/><rect x="17" y="6" width="4" height="16"/><rect x="24" y="6" width="4" height="16"/><rect x="31" y="6" width="4" height="16"/><rect x="38" y="6" width="4" height="16"/><rect x="45" y="6" width="4" height="16"/><rect x="50" y="6" width="4" height="16"/></g>
+    </svg>
+  </div>
+
   <!-- Header -->
-  <header class="header" id="top">
-    <div class="container header__inner">
+  <header class="header" id="header">
+    <div class="header__bar">
       <a class="brand" href="#top" aria-label="Privé Hair Studio">
-        <span class="brand__mark" aria-hidden="true">P</span>
-        <span class="brand__text"><b>PRIVÉ</b><small>Hair Studio</small></span>
+        <span class="brand__mark" aria-hidden="true"><i></i></span>
+        <span class="brand__word">PRIVÉ<small>Hair Studio</small></span>
       </a>
-
       <nav class="nav" id="nav" aria-label="Kryesore">
-        <a href="#services" data-i18n="nav.services">Shërbimet</a>
-        <a href="#studio" data-i18n="nav.studio">Studio</a>
-        <a href="#work" data-i18n="nav.work">Punët</a>
-        <a href="#visit" data-i18n="nav.visit">Vizito</a>
-        <a class="btn btn--brass nav__cta" href="#book" data-i18n="cta.book">Rezervo termin</a>
+        <a href="#lab"><span>Fade Lab</span></a>
+        <a href="#lookbook"><span data-i18n="nav.looks">Stilet</span></a>
+        <a href="#menu"><span data-i18n="nav.menu">Çmimet</span></a>
+        <a href="#visit"><span data-i18n="nav.visit">Vizito</span></a>
+        <a class="btn btn--red nav__cta" href="#book" data-i18n="cta.book">Rezervo termin</a>
       </nav>
-
       <div class="header__tools">
+        <span class="status" id="statusHeader"><i></i><span></span></span>
         <div class="lang" role="group" aria-label="Gjuha / Language">
           <button type="button" data-lang="sq" aria-pressed="true">SQ</button>
           <button type="button" data-lang="en" aria-pressed="false">EN</button>
         </div>
-        <a class="btn btn--brass header__book" href="#book" data-i18n="cta.bookShort">Rezervo</a>
+        <a class="btn btn--red header__book" href="#book" data-magnetic data-i18n="cta.bookShort">Rezervo</a>
         <button class="burger" id="burger" type="button" aria-expanded="false" aria-controls="nav" aria-label="Menu">
           <span></span><span></span>
         </button>
@@ -57,262 +77,302 @@
   </header>
 
   <main>
-    <!-- Hero -->
-    <section class="hero" aria-labelledby="heroTitle">
-      <div class="container hero__grid">
-        <div class="hero__copy">
-          <p class="eyebrow reveal"><span class="status" id="statusHero"><i></i><span></span></span></p>
-          <h1 id="heroTitle" class="hero__title reveal" data-i18n-html="hero.title">Prerje e pastër.<br /><em>Pa pritje.</em></h1>
-          <p class="hero__lead reveal" data-i18n="hero.lead">Një studio private berberie ku çdo klient merr vëmendjen e plotë: fade të sakta, mjekër e formuar me brisk dhe rruajtje me peshqir të nxehtë. Me termin, pa pritje.</p>
-          <div class="hero__actions reveal">
-            <a class="btn btn--brass btn--lg" href="#book">
-              <span data-i18n="cta.book">Rezervo termin</span>
-              <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-            </a>
-            <a class="btn btn--ghost btn--lg" href="#services" data-i18n="cta.prices">Shiko çmimet</a>
+    <!-- Hero: shave the screen -->
+    <section class="hero" id="top" aria-labelledby="heroTitle">
+      <div class="hero__skin" aria-hidden="true">
+        <div class="hero__word">PRIVÉ</div>
+      </div>
+      <canvas class="hero__hair" id="hair" aria-hidden="true"></canvas>
+
+      <div class="hero__ui">
+        <p class="hero__eyebrow diff"><span>Hair Studio</span><span class="hero__dot"></span><span class="js-city">Kosovë</span><span class="hero__dot"></span><span data-i18n="hero.appt">Vetëm me termin</span></p>
+        <div class="hero__bottom">
+          <div class="hero__copy">
+            <h1 id="heroTitle" class="hero__title diff" data-i18n-html="hero.title"><span class="line">Prerje e pastër.</span><span class="line">Pa pritje.</span></h1>
+            <p class="hero__lead diff" data-i18n="hero.lead">Fade të sakta, mjekër e formuar me brisk dhe rruajtje me peshqir të nxehtë, në një studio ku je i vetmi klient në karrige.</p>
+            <div class="hero__actions">
+              <a class="btn btn--red btn--lg" href="#book" data-magnetic><span data-i18n="cta.book">Rezervo termin</span><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+              <a class="btn btn--bone btn--lg" href="#lab" data-magnetic><span data-i18n="cta.lab">Ndërto prerjen</span></a>
+            </div>
           </div>
-          <ul class="hero__facts reveal">
-            <li><b data-i18n="fact1.t">Me termin</b><span data-i18n="fact1.d">Pa radhë, pa pritje</span></li>
-            <li><b data-i18n="fact2.t">Mjete sterile</b><span data-i18n="fact2.d">Pas çdo klienti</span></li>
-            <li><b data-i18n-html="fact3.t">Nga <span class="js-from-price">3 €</span></b><span data-i18n="fact3.d">Çmime të qarta</span></li>
-          </ul>
+          <div class="cutmeter" id="cutmeter">
+            <svg class="cutmeter__ring" viewBox="0 0 120 120" aria-hidden="true">
+              <circle cx="60" cy="60" r="52" class="cutmeter__track"/>
+              <circle cx="60" cy="60" r="52" class="cutmeter__bar" id="cutBar"/>
+            </svg>
+            <div class="cutmeter__inner">
+              <b id="cutPct">0%</b>
+            </div>
+            <p class="cutmeter__hint" id="cutHint"></p>
+            <button type="button" class="cutmeter__grow" id="growBtn" hidden data-i18n="hero.grow">Rriti prapë ↺</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Ticker -->
+    <div class="ticker" aria-hidden="true">
+      <div class="ticker__track" id="ticker">
+        <span>Skin fade</span><b>✦</b><span>Taper</span><b>✦</b><span>Beard sculpt</span><b>✦</b><span>Hot towel shave</span><b>✦</b><span>Line-up</span><b>✦</b><span>Scissor cut</span><b>✦</b><span>Buzz cut</span><b>✦</b>
+        <span>Skin fade</span><b>✦</b><span>Taper</span><b>✦</b><span>Beard sculpt</span><b>✦</b><span>Hot towel shave</span><b>✦</b><span>Line-up</span><b>✦</b><span>Scissor cut</span><b>✦</b><span>Buzz cut</span><b>✦</b>
+      </div>
+    </div>
+
+    <!-- Manifesto -->
+    <section class="manifesto" id="studio" aria-label="Studio">
+      <div class="container">
+        <p class="kicker reveal"><span class="kicker__n">00</span><span data-i18n="studio.kicker">Studio</span></p>
+        <p class="manifesto__text" id="manifesto" data-i18n="studio.text">Privé është një studio e vogël berberie e ndërtuar rreth një ideje të thjeshtë: një klient, një karrige, vëmendje e plotë. Pa radhë dhe pa nxitim, vetëm prerje të pastra që duken mirë edhe pas dy javësh.</p>
+        <div class="values">
+          <article class="value reveal" data-tilt>
+            <span class="value__n">I</span>
+            <svg class="value__i" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="17"/><path d="M24 14v10l7 5"/></svg>
+            <h3 data-i18n="v1.t">Në kohë, çdo herë</h3>
+            <p data-i18n="v1.d">Punojmë vetëm me termin. Ora jote është e rezervuar vetëm për ty.</p>
+          </article>
+          <article class="value reveal" data-tilt>
+            <span class="value__n">II</span>
+            <svg class="value__i" viewBox="0 0 48 48" aria-hidden="true"><path d="M24 6 9 12v11c0 9 6.4 16.4 15 19 8.6-2.6 15-10 15-19V12z"/><path d="m17 24 5 5 9-10"/></svg>
+            <h3 data-i18n="v2.t">Higjienë pa kompromis</h3>
+            <p data-i18n="v2.d">Mjete të sterilizuara pas çdo klienti, brisqe njëpërdorimshe, peshqirë të freskët.</p>
+          </article>
+          <article class="value reveal" data-tilt>
+            <span class="value__n">III</span>
+            <svg class="value__i" viewBox="0 0 48 48" aria-hidden="true"><circle cx="14" cy="36" r="6"/><circle cx="34" cy="36" r="6"/><path d="M18 31 36 7M30 31 12 7"/></svg>
+            <h3 data-i18n="v3.t">Prerje sipas teje</h3>
+            <p data-i18n="v3.d">Konsultë para çdo prerjeje: forma e fytyrës, flokët dhe si i rregullon çdo mëngjes.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Fade Lab -->
+    <section class="lab" id="lab" aria-labelledby="labTitle">
+      <div class="container">
+        <div class="section-head">
+          <p class="kicker reveal"><span class="kicker__n">01</span>Fade Lab</p>
+          <h2 id="labTitle" class="h2 reveal" data-i18n-html="lab.title">Ndërto <em>prerjen tënde</em></h2>
+          <p class="section-head__lead reveal" data-i18n="lab.lead">Zgjidh fade-in, gjatësinë sipër dhe mjekrën. Çmimi dhe koha llogariten menjëherë, dhe me një klik e rezervon pikërisht këtë prerje.</p>
         </div>
 
-        <div class="hero__visual reveal" aria-hidden="true">
-          <div class="arch" id="heroArch">
-            <div class="arch__art">
-              <div class="pole"></div>
-              <div class="arch__glow"></div>
-              <span class="arch__mono">P</span>
-              <div class="arch__tools">
-                <svg viewBox="0 0 120 120" class="tool tool--scissors"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="34" cy="86" r="13"/><circle cx="62" cy="96" r="13"/><path d="M44 77 98 18M55 84 104 30"/><circle cx="72" cy="56" r="2.2" fill="currentColor"/></g></svg>
+        <div class="lab__grid">
+          <div class="lab__stage reveal">
+            <div class="lab__mirror" aria-hidden="true">
+              <svg viewBox="0 0 200 200"><defs><path id="mirrorPath" d="M100,100 m-90,0 a90,90 0 1,1 180,0 a90,90 0 1,1 -180,0"/></defs><text><textPath href="#mirrorPath">FADE LAB ✦ PRIVÉ HAIR STUDIO ✦ FADE LAB ✦ PRIVÉ HAIR STUDIO ✦</textPath></text></svg>
+            </div>
+            <div class="lab__head" id="labHead"></div>
+            <div class="lab__tag" id="labTag" aria-live="polite"></div>
+          </div>
+
+          <div class="lab__panel reveal">
+            <fieldset class="ctrl">
+              <legend><span class="ctrl__n">A</span><span data-i18n="lab.fade">Fade-i</span></legend>
+              <div class="seg seg--6" id="labFade"></div>
+            </fieldset>
+
+            <div class="ctrl">
+              <div class="ctrl__row">
+                <label for="labTop"><span class="ctrl__n">B</span><span data-i18n="lab.top">Gjatësia sipër</span></label>
+                <output id="labTopOut" for="labTop">30 mm</output>
+              </div>
+              <input type="range" id="labTop" min="0" max="80" step="1" value="30" class="range" />
+              <div class="range__scale" aria-hidden="true"><span>Buzz</span><span data-i18n="lab.short">Shkurt</span><span data-i18n="lab.medium">Mesatare</span><span data-i18n="lab.long">E gjatë</span></div>
+            </div>
+
+            <fieldset class="ctrl">
+              <legend><span class="ctrl__n">C</span><span data-i18n="lab.beard">Mjekra</span></legend>
+              <div class="seg seg--4" id="labBeard"></div>
+            </fieldset>
+
+            <fieldset class="ctrl">
+              <legend><span class="ctrl__n">D</span><span data-i18n="lab.extras">Shtesa</span></legend>
+              <div class="chips" id="labExtras"></div>
+            </fieldset>
+
+            <div class="receipt" id="receipt">
+              <ul class="receipt__lines" id="labLines"></ul>
+              <div class="receipt__total">
+                <div><span data-i18n="lab.total">Totali</span><small id="labMin">40 min</small></div>
+                <b><span id="labPrice">8</span><span class="js-cur"> €</span></b>
+              </div>
+              <div class="receipt__actions">
+                <button type="button" class="btn btn--red btn--lg" id="labBook"><span data-i18n="lab.book">Rezervo këtë prerje</span><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+                <button type="button" class="btn btn--line btn--icon" id="labDice" data-i18n-attr="aria-label:lab.random;title:lab.random" aria-label="Prerje e rastësishme" title="Prerje e rastësishme">
+                  <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="4"/><circle cx="9" cy="9" r="1.2" fill="currentColor"/><circle cx="15" cy="15" r="1.2" fill="currentColor"/><circle cx="15" cy="9" r="1.2" fill="currentColor"/><circle cx="9" cy="15" r="1.2" fill="currentColor"/></svg>
+                </button>
               </div>
             </div>
           </div>
-          <svg class="badge" viewBox="0 0 200 200">
-            <defs><path id="circ" d="M100,100 m-78,0 a78,78 0 1,1 156,0 a78,78 0 1,1 -156,0" /></defs>
-            <text><textPath href="#circ">PRIVÉ HAIR STUDIO · BARBER · KOSOVË · BY APPOINTMENT · </textPath></text>
-            <text class="badge__p" x="100" y="100" text-anchor="middle" dominant-baseline="central">P</text>
-          </svg>
-        </div>
-      </div>
-
-      <div class="marquee" aria-hidden="true">
-        <div class="marquee__track">
-          <span>Skin fade</span><i>✦</i><span>Classic cut</span><i>✦</i><span>Beard sculpting</span><i>✦</i><span>Hot towel shave</span><i>✦</i><span>Line-up</span><i>✦</i><span>Scissor cut</span><i>✦</i><span>Kids' cut</span><i>✦</i>
-          <span>Skin fade</span><i>✦</i><span>Classic cut</span><i>✦</i><span>Beard sculpting</span><i>✦</i><span>Hot towel shave</span><i>✦</i><span>Line-up</span><i>✦</i><span>Scissor cut</span><i>✦</i><span>Kids' cut</span><i>✦</i>
         </div>
       </div>
     </section>
 
-    <!-- Services -->
-    <section class="section section--light" id="services" aria-labelledby="servicesTitle">
+    <!-- Lookbook -->
+    <section class="looks" id="lookbook" aria-labelledby="looksTitle">
       <div class="container">
-        <div class="section__head">
-          <p class="kicker reveal">01 · <span data-i18n="services.kicker">Shërbimet &amp; çmimet</span></p>
-          <h2 id="servicesTitle" class="h2 reveal" data-i18n-html="services.title">Menuja e <em>studios</em></h2>
-          <p class="section__lead reveal" data-i18n="services.lead">Çdo shërbim fillon me një konsultë të shkurtër. Zgjidh çfarë të duhet dhe rezervo me një klik.</p>
-        </div>
-
-        <div class="tabs reveal" role="tablist" aria-label="Kategoritë" id="serviceTabs"></div>
-        <div class="menu" id="serviceMenu"></div>
-        <p class="menu__note reveal" data-i18n="services.note">Çmimet janë në euro dhe përfshijnë larjen. Për flokë shumë të gjata ose dizajne të veçanta, pyet në studio.</p>
-      </div>
-    </section>
-
-    <!-- Studio / about -->
-    <section class="section" id="studio" aria-labelledby="studioTitle">
-      <div class="container studio">
-        <div class="studio__media reveal" id="studioMedia">
-          <div class="studio__art" aria-hidden="true">
-            <div class="chair">
-              <svg viewBox="0 0 240 260" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M70 40c0-14 11-22 25-22h50c14 0 25 8 25 22v70H70z"/>
-                <path d="M58 112h124v26c0 8-6 14-14 14H72c-8 0-14-6-14-14z"/>
-                <path d="M40 104h22M178 104h22M40 104v22M200 104v22"/>
-                <path d="M120 152v52M84 222h72M120 204l-36 18M120 204l36 18"/>
-                <path d="M104 160l-20 28h72l-20-28"/>
-              </svg>
-            </div>
-            <span class="studio__word">Privé</span>
-          </div>
-        </div>
-        <div class="studio__copy">
-          <p class="kicker reveal">02 · <span data-i18n="studio.kicker">Studio</span></p>
-          <h2 id="studioTitle" class="h2 reveal" data-i18n-html="studio.title">Pak karrige.<br /><em>Shumë vëmendje.</em></h2>
-          <p class="reveal" data-i18n="studio.p1">Privé u krijua për ata që duan prerjen e duhur pa zhurmë dhe pa nxitim. Punojmë vetëm me termin, që koha jote të jetë e jotja: nga konsulta e parë deri te stilimi i fundit.</p>
-          <p class="reveal" data-i18n="studio.p2">Mjetet sterilizohen pas çdo klienti, peshqirët janë gjithmonë të freskët dhe produktet janë profesionale. Detajet e vogla janë ato që e bëjnë prerjen të duket mirë edhe pas dy javësh.</p>
-          <ul class="pillars">
-            <li class="reveal">
-              <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
-              <div><b data-i18n="p1.t">Në kohë, çdo herë</b><span data-i18n="p1.d">Termini yt është i rezervuar vetëm për ty.</span></div>
-            </li>
-            <li class="reveal">
-              <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4 6v6c0 4.5 3.4 8.3 8 9 4.6-.7 8-4.5 8-9V6z"/><path d="m9 12 2 2 4-4"/></svg>
-              <div><b data-i18n="p2.t">Higjienë pa kompromis</b><span data-i18n="p2.d">Mjete sterile, brisqe njëpërdorimshe.</span></div>
-            </li>
-            <li class="reveal">
-              <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20c2-6 6-9 8-9s6 3 8 9"/><circle cx="12" cy="6" r="3"/></svg>
-              <div><b data-i18n="p3.t">Prerje sipas teje</b><span data-i18n="p3.d">Forma e fytyrës, flokët dhe stili yt.</span></div>
-            </li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="container steps">
-        <div class="step reveal"><span class="step__n">I</span><h3 data-i18n="s1.t">Rezervo</h3><p data-i18n="s1.d">Zgjidh shërbimin, ditën dhe orën. Konfirmimin e merr në mesazh.</p></div>
-        <div class="step reveal"><span class="step__n">II</span><h3 data-i18n="s2.t">Ulu rehat</h3><p data-i18n="s2.d">Konsultë e shkurtër, pastaj prerja pa nxitim.</p></div>
-        <div class="step reveal"><span class="step__n">III</span><h3 data-i18n="s3.t">Dil i freskët</h3><p data-i18n="s3.d">Stilim në fund dhe këshilla si ta mbash formën.</p></div>
-      </div>
-    </section>
-
-    <!-- Work / gallery -->
-    <section class="section section--deep" id="work" aria-labelledby="workTitle">
-      <div class="container">
-        <div class="section__head section__head--row">
+        <div class="section-head section-head--row">
           <div>
-            <p class="kicker reveal">03 · <span data-i18n="work.kicker">Punët</span></p>
-            <h2 id="workTitle" class="h2 reveal" data-i18n-html="work.title">Prerjet flasin <em>vetë</em></h2>
+            <p class="kicker reveal"><span class="kicker__n">02</span><span data-i18n="looks.kicker">Stilet</span></p>
+            <h2 id="looksTitle" class="h2 reveal" data-i18n-html="looks.title">Gjej <em>stilin tënd</em></h2>
           </div>
-          <a class="btn btn--ghost reveal js-ig" href="https://www.instagram.com/privehairstudioks/" target="_blank" rel="noopener">
-            <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>
-            <span class="js-ig-handle">@privehairstudioks</span>
-          </a>
+          <div class="looks__nav reveal">
+            <button type="button" class="round" id="looksPrev" data-i18n-attr="aria-label:prev" aria-label="Para"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></button>
+            <button type="button" class="round" id="looksNext" data-i18n-attr="aria-label:next" aria-label="Pas"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+          </div>
         </div>
-        <div class="gallery" id="gallery"></div>
+      </div>
+      <div class="looks__track" id="looksTrack" tabindex="0" aria-label="Lookbook"></div>
+      <div class="container">
+        <div class="photos" id="photos" hidden></div>
       </div>
     </section>
 
-    <!-- Team (shown only when config.team has people) -->
-    <section class="section" id="team" aria-labelledby="teamTitle" hidden>
+    <!-- Menu -->
+    <section class="menu" id="menu" aria-labelledby="menuTitle">
       <div class="container">
-        <div class="section__head">
-          <p class="kicker reveal" data-i18n="team.kicker">Ekipi</p>
-          <h2 id="teamTitle" class="h2 reveal" data-i18n-html="team.title">Duart pas <em>prerjes</em></h2>
+        <div class="section-head section-head--row">
+          <div>
+            <p class="kicker reveal"><span class="kicker__n">03</span><span data-i18n="menu.kicker">Çmimet</span></p>
+            <h2 id="menuTitle" class="h2 reveal" data-i18n-html="menu.title">Menuja <em>e plotë</em></h2>
+          </div>
+          <div class="tabs reveal" role="tablist" aria-label="Kategoritë" id="menuTabs"></div>
         </div>
-        <div class="team" id="teamGrid"></div>
+        <ol class="menu__list" id="menuList"></ol>
+        <p class="menu__note reveal" data-i18n="menu.note">Çmimet janë në euro dhe përfshijnë larjen. Për flokë shumë të gjata ose dizajne të veçanta, pyet në studio.</p>
       </div>
     </section>
 
     <!-- Booking -->
-    <section class="section section--light" id="book" aria-labelledby="bookTitle">
-      <div class="container book">
-        <div class="book__intro">
-          <p class="kicker reveal">04 · <span data-i18n="book.kicker">Rezervimi</span></p>
-          <h2 id="bookTitle" class="h2 reveal" data-i18n-html="book.title">Zë vendin <em>tënd</em></h2>
-          <p class="reveal" id="bookHow" data-i18n="book.lead">Plotëso formularin dhe kërkesa jote dërgohet direkt te ne. Të konfirmojmë terminin sa më shpejt.</p>
-          <div class="summary reveal" id="summary" aria-live="polite">
-            <div class="summary__row"><span data-i18n="sum.service">Shërbimi</span><b id="sumService">–</b></div>
-            <div class="summary__row"><span data-i18n="sum.when">Kur</span><b id="sumWhen">–</b></div>
-            <div class="summary__row"><span data-i18n="sum.length">Kohëzgjatja</span><b id="sumLength">–</b></div>
-            <div class="summary__row summary__total"><span data-i18n="sum.price">Çmimi</span><b id="sumPrice">–</b></div>
-          </div>
-          <div class="book__alt reveal" id="bookAlt"></div>
+    <section class="book" id="book" aria-labelledby="bookTitle">
+      <div class="container">
+        <div class="section-head">
+          <p class="kicker reveal"><span class="kicker__n">04</span><span data-i18n="book.kicker">Rezervimi</span></p>
+          <h2 id="bookTitle" class="h2 reveal" data-i18n-html="book.title">Merr <em>biletën</em></h2>
+          <p class="section-head__lead reveal" data-i18n="book.lead">Zgjidh shërbimin, ditën dhe orën. Kërkesa na vjen e shkruar gati dhe ne ta konfirmojmë terminin.</p>
         </div>
 
-        <form class="form reveal" id="bookForm" novalidate>
-          <div class="field">
-            <label for="fService" data-i18n="f.service">Shërbimi</label>
-            <select id="fService" name="service" required></select>
-          </div>
-          <div class="field-row">
-            <div class="field">
-              <label for="fDate" data-i18n="f.date">Data</label>
-              <input id="fDate" name="date" type="date" required />
+        <div class="book__grid">
+          <form class="steps" id="bookForm" novalidate>
+            <fieldset class="step reveal">
+              <legend><span class="step__n">1</span><span data-i18n="b.service">Shërbimi</span></legend>
+              <div class="svc" id="svcList"></div>
+            </fieldset>
+
+            <fieldset class="step reveal">
+              <legend><span class="step__n">2</span><span data-i18n="b.day">Dita</span></legend>
+              <div class="dayrow" id="dayRow"></div>
+            </fieldset>
+
+            <fieldset class="step reveal">
+              <legend><span class="step__n">3</span><span data-i18n="b.time">Ora</span></legend>
+              <div class="slots" id="slotGrid"></div>
+            </fieldset>
+
+            <fieldset class="step reveal">
+              <legend><span class="step__n">4</span><span data-i18n="b.you">Të dhënat</span></legend>
+              <div class="fields">
+                <label class="field"><span data-i18n="b.name">Emri</span><input id="fName" name="name" type="text" autocomplete="name" required data-i18n-attr="placeholder:b.nameP" placeholder="Emri dhe mbiemri" /></label>
+                <label class="field"><span data-i18n="b.phone">Telefoni</span><input id="fPhone" name="phone" type="tel" autocomplete="tel" inputmode="tel" required placeholder="+383 4x xxx xxx" /></label>
+                <label class="field field--wide"><span><span data-i18n="b.note">Shënim</span> <small data-i18n="b.optional">(opsionale)</small></span><textarea id="fNote" name="note" rows="2" data-i18n-attr="placeholder:b.noteP" placeholder="P.sh. mos e shkurto shumë sipër"></textarea></label>
+              </div>
+            </fieldset>
+          </form>
+
+          <aside class="ticket-wrap">
+            <div class="ticket" id="ticket">
+              <div class="ticket__head">
+                <span class="ticket__brand">PRIVÉ<small>Hair Studio</small></span>
+                <span class="ticket__no">Nr. <b id="tNo">0000</b></span>
+              </div>
+              <dl class="ticket__rows">
+                <div><dt data-i18n="t.service">Shërbimi</dt><dd id="tService">–</dd></div>
+                <div><dt data-i18n="t.day">Dita</dt><dd id="tDay">–</dd></div>
+                <div><dt data-i18n="t.time">Ora</dt><dd id="tTime">–</dd></div>
+                <div><dt data-i18n="t.length">Kohëzgjatja</dt><dd id="tLength">–</dd></div>
+                <div><dt data-i18n="t.client">Klienti</dt><dd id="tName">–</dd></div>
+              </dl>
+              <div class="ticket__tear" aria-hidden="true"></div>
+              <div class="ticket__foot">
+                <div class="ticket__total"><span data-i18n="t.total">Totali</span><b id="tTotal">–</b></div>
+                <svg class="ticket__code" id="tCode" viewBox="0 0 120 40" preserveAspectRatio="none" aria-hidden="true"></svg>
+              </div>
+              <div class="ticket__stamp" id="tStamp" aria-hidden="true"><span data-i18n="t.stamp">E dërguar</span></div>
             </div>
-            <div class="field">
-              <label for="fTime" data-i18n="f.time">Ora</label>
-              <select id="fTime" name="time" required></select>
-            </div>
-          </div>
-          <div class="days" id="quickDays" aria-label="Ditët"></div>
-          <div class="field" id="fBarberWrap" hidden>
-            <label for="fBarber" data-i18n="f.barber">Berberi</label>
-            <select id="fBarber" name="barber"></select>
-          </div>
-          <div class="field-row">
-            <div class="field">
-              <label for="fName" data-i18n="f.name">Emri</label>
-              <input id="fName" name="name" type="text" autocomplete="name" required data-i18n-attr="placeholder:f.nameP" placeholder="Emri dhe mbiemri" />
-            </div>
-            <div class="field">
-              <label for="fPhone" data-i18n="f.phone">Telefoni</label>
-              <input id="fPhone" name="phone" type="tel" autocomplete="tel" inputmode="tel" required placeholder="+383 4x xxx xxx" />
-            </div>
-          </div>
-          <div class="field">
-            <label for="fNote"><span data-i18n="f.note">Shënim</span> <small data-i18n="f.optional">(opsionale)</small></label>
-            <textarea id="fNote" name="note" rows="3" data-i18n-attr="placeholder:f.noteP" placeholder="P.sh. fade e ulët, mos e shkurto shumë sipër"></textarea>
-          </div>
-          <p class="form__error" id="formError" role="alert" hidden></p>
-          <button class="btn btn--dark btn--lg btn--block" type="submit" id="bookSubmit">
-            <span id="submitLabel" data-i18n="f.submit">Dërgo kërkesën</span>
-            <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-          </button>
-          <p class="form__fine" id="formFine" data-i18n="f.fineIg">Kërkesa hapet në Instagram me mesazhin gati. Termini konsiderohet i rezervuar pasi ta konfirmojmë.</p>
-        </form>
+            <p class="form-error" id="formError" role="alert" hidden></p>
+            <button type="submit" form="bookForm" class="btn btn--red btn--lg btn--block" id="bookSubmit">
+              <span id="submitLabel">Dërgo në Instagram</span>
+              <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </button>
+            <p class="ticket__fine" id="formFine"></p>
+            <div class="ticket__alt" id="bookAlt"></div>
+          </aside>
+        </div>
       </div>
     </section>
 
     <!-- Visit -->
-    <section class="section" id="visit" aria-labelledby="visitTitle">
-      <div class="container visit">
-        <div class="visit__info">
-          <p class="kicker reveal">05 · <span data-i18n="visit.kicker">Vizito</span></p>
-          <h2 id="visitTitle" class="h2 reveal" data-i18n-html="visit.title">Orari &amp; <em>lokacioni</em></h2>
-          <p class="status status--lg reveal" id="statusVisit"><i></i><span></span></p>
-          <table class="hours reveal" id="hoursTable"><caption class="sr-only" data-i18n="visit.hours">Orari i punës</caption><tbody></tbody></table>
+    <section class="visit" id="visit" aria-labelledby="visitTitle">
+      <div class="container">
+        <div class="section-head">
+          <p class="kicker reveal"><span class="kicker__n">05</span><span data-i18n="visit.kicker">Vizito</span></p>
+          <h2 id="visitTitle" class="h2 reveal" data-i18n-html="visit.title">Orari <em>&amp; lokacioni</em></h2>
         </div>
-        <div class="visit__card reveal">
-          <div class="map" id="map">
-            <div class="map__placeholder">
-              <svg viewBox="0 0 24 24" class="i" aria-hidden="true"><path d="M12 21s-7-6.1-7-11.5A7 7 0 0 1 19 9.5C19 14.9 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
-              <span class="js-city">Kosovë</span>
-            </div>
+        <div class="visit__grid">
+          <div class="dial-card reveal">
+            <div class="dial" id="dial"></div>
+            <div class="week" id="week" aria-label="Ditët e javës"></div>
           </div>
-          <ul class="contact" id="contactList"></ul>
+          <div class="visit__side">
+            <div class="map reveal" id="map">
+              <div class="map__placeholder">
+                <svg viewBox="0 0 24 24" class="i" aria-hidden="true"><path d="M12 21s-7-6.1-7-11.5A7 7 0 0 1 19 9.5C19 14.9 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+                <span class="js-city">Kosovë</span>
+              </div>
+            </div>
+            <ul class="contact reveal" id="contactList"></ul>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- CTA -->
-    <section class="cta">
-      <div class="container cta__inner">
-        <h2 class="cta__title reveal" data-i18n-html="cta.title">Gati për prerjen <em>e radhës?</em></h2>
-        <a class="btn btn--brass btn--lg reveal" href="#book" data-i18n="cta.book">Rezervo termin</a>
+    <!-- Final CTA -->
+    <section class="finale" aria-labelledby="finaleTitle">
+      <div class="container finale__inner">
+        <h2 class="finale__title reveal" id="finaleTitle" data-i18n-html="finale.title">Karrigia <em>të pret.</em></h2>
+        <a class="btn btn--red btn--xl reveal" href="#book" data-magnetic data-i18n="cta.book">Rezervo termin</a>
       </div>
+      <div class="finale__word" aria-hidden="true">PRIVÉ</div>
     </section>
   </main>
 
   <footer class="footer">
     <div class="container footer__inner">
-      <a class="brand" href="#top" aria-label="Privé Hair Studio">
-        <span class="brand__mark" aria-hidden="true">P</span>
-        <span class="brand__text"><b>PRIVÉ</b><small>Hair Studio</small></span>
-      </a>
+      <span class="footer__brand">PRIVÉ <small>Hair Studio</small></span>
       <nav class="footer__nav" aria-label="Footer">
-        <a href="#services" data-i18n="nav.services">Shërbimet</a>
-        <a href="#studio" data-i18n="nav.studio">Studio</a>
-        <a href="#work" data-i18n="nav.work">Punët</a>
+        <a href="#lab">Fade Lab</a>
+        <a href="#lookbook" data-i18n="nav.looks">Stilet</a>
+        <a href="#menu" data-i18n="nav.menu">Çmimet</a>
         <a href="#visit" data-i18n="nav.visit">Vizito</a>
-        <a class="js-ig" href="https://www.instagram.com/privehairstudioks/" target="_blank" rel="noopener">Instagram</a>
+        <a class="js-ig" href="https://www.instagram.com/privehairstudioks/" target="_blank" rel="noopener">Instagram ↗</a>
       </nav>
       <p class="footer__copy">© <span id="year">2026</span> Privé Hair Studio</p>
     </div>
   </footer>
 
-  <!-- Mobile sticky booking bar -->
+  <!-- Mobile booking bar -->
   <div class="dock" id="dock">
-    <a class="dock__call js-dock-contact" href="https://www.instagram.com/privehairstudioks/" target="_blank" rel="noopener" aria-label="Instagram">
+    <a class="dock__icon js-dock-contact" href="https://www.instagram.com/privehairstudioks/" target="_blank" rel="noopener" aria-label="Instagram">
       <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>
     </a>
-    <a class="btn btn--brass dock__book" href="#book" data-i18n="cta.book">Rezervo termin</a>
+    <a class="btn btn--red dock__book" href="#book" data-i18n="cta.book">Rezervo termin</a>
   </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
   <script src="js/config.js"></script>
   <script src="js/i18n.js"></script>
+  <script src="js/head.js"></script>
+  <script src="js/hair.js"></script>
   <script src="js/main.js"></script>
 </body>
 </html>
