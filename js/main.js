@@ -234,15 +234,8 @@
   }
 
   function updateLab(changed) {
-    const headEl = $("#labHead");
-    headEl.innerHTML = window.renderHead(labState(), "lab");
-    if (changed) {
-      headEl.classList.remove("is-swap");
-      void headEl.offsetWidth;
-      headEl.classList.add("is-swap");
-    }
     $("#labTag").textContent = labSummary();
-    updateLabPhoto();
+    updateLabPhoto(changed);
     $("#labTopOut").textContent = lab.top + " mm";
     const range = $("#labTop");
     range.value = lab.top;
@@ -270,98 +263,97 @@
   const mapPhotos = (o) => Object.fromEntries(Object.entries(o || {}).map(([k, v]) => [k, photoOf(v)]));
   const labPhotoInfo = mapPhotos(C.lab.photos && C.lab.photos.fades);
   const beardPhotoInfo = mapPhotos(C.lab.photos && C.lab.photos.beards);
-  const labPhotos = Object.fromEntries(Object.entries(labPhotoInfo).map(([k, v]) => [k, v.src || ""]));
-  const beardPhotos = Object.fromEntries(Object.entries(beardPhotoInfo).map(([k, v]) => [k, v.src || ""]));
-  const brokenPhotos = new Set();
-  const usable = (src) => !!src && !brokenPhotos.has(src);
-  const hasLabPhotos = () => Object.values(labPhotos).some(usable);
-  let labView = store.get("labView") === "draw" ? "draw" : "photo";
-  const photoImgs = $$("#labPhotos img");
-  let photoActive = 0, photoSrc = "";
 
-  function showPhoto(src) {
-    if (src === photoSrc) return;
-    photoSrc = src;
-    const next = photoImgs[1 - photoActive];
-    let done = false;
-    const swap = () => {
-      if (done || photoSrc !== src) return;
-      done = true;
-      next.classList.add("is-on");
-      photoImgs[photoActive].classList.remove("is-on");
-      photoActive = 1 - photoActive;
-    };
-    next.onload = swap;
-    next.onerror = () => {
-      brokenPhotos.add(src);
-      photoSrc = "";
-      updateLabPhoto();
-    };
-    next.src = src;
-    if (next.complete && next.naturalWidth) swap();
+  // Each photo gets its own <img> in the stage, created once and kept, so
+  // switching between fades is instant once a photo has loaded.
+  const photoBox = $("#labPhotos");
+  photoBox.innerHTML = "";
+  const photoEls = new Map();
+  let currentPhoto = "";
+  const loaded = (img) => img.complete && img.naturalWidth > 0;
+
+  function photoEl(src) {
+    let img = photoEls.get(src);
+    if (!img) {
+      img = new Image();
+      img.alt = "";
+      img.decoding = "async";
+      img.addEventListener("error", () => {
+        img.dataset.failed = "1";
+        if (src === currentPhoto) updateLabPhoto();
+      });
+      img.src = src;
+      photoBox.appendChild(img);
+      photoEls.set(src, img);
+    }
+    return img;
   }
 
-  function updateLabPhoto() {
+  function updateLabPhoto(changed) {
     const stage = $("#labStage");
-    const fadeSrc = labPhotos[lab.fade];
-    const any = hasLabPhotos();
-    const on = any && labView === "photo" && usable(fadeSrc);
-    $("#labView").hidden = !any;
-    $$("#labView [data-view]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.view === labView)));
-    stage.classList.toggle("is-photo", on);
-    $("#labHead").dataset.label = on ? t("combo") : "";
-
+    const info = labPhotoInfo[lab.fade] || {};
+    const fade = L.fades.find((f) => f.id === lab.fade);
     const cap = $("#labCaption");
-    cap.hidden = !on;
-    if (on) {
-      showPhoto(fadeSrc);
-      const fade = L.fades.find((f) => f.id === lab.fade);
-      $("b", cap).textContent = local(fade);
-      const info = labPhotoInfo[lab.fade] || {};
-      const credit = $("#labCredit");
-      credit.hidden = !info.credit;
-      credit.textContent = info.credit ? "· " + info.credit : "";
-      if (info.href) credit.href = info.href; else credit.removeAttribute("href");
+    $("b", cap).textContent = local(fade);
+    if (changed) {
+      cap.classList.remove("is-swap");
+      void cap.offsetWidth;
+      cap.classList.add("is-swap");
+    }
+    const credit = $("#labCredit");
+    credit.hidden = !info.credit;
+    credit.textContent = info.credit ? "· " + info.credit : "";
+    if (info.href) credit.href = info.href; else credit.removeAttribute("href");
+
+    currentPhoto = info.src || "";
+    const img = info.src ? photoEl(info.src) : null;
+    const ok = img && !img.dataset.failed;
+    stage.classList.toggle("is-photo", !!ok);
+    if (ok) {
+      const show = () => {
+        if (currentPhoto !== info.src) return;
+        photoEls.forEach((el) => el.classList.toggle("is-on", el === img));
+        stage.classList.remove("is-loading");
+      };
+      if (loaded(img)) show();
+      else {
+        stage.classList.add("is-loading");
+        img.addEventListener("load", show, { once: true });
+      }
+    } else {
+      stage.classList.remove("is-loading");
+      photoEls.forEach((el) => el.classList.remove("is-on"));
     }
 
-    const beardSrc = beardPhotos[lab.beard];
+    const beard = photoOf(beardPhotoInfo[lab.beard]);
     const pic = $("#labBeardPic");
-    const showBeard = on && lab.beard !== "none" && usable(beardSrc);
+    const showBeard = lab.beard !== "none" && !!beard.src;
     pic.hidden = !showBeard;
     if (showBeard) {
-      const img = $("img", pic);
-      if (img.getAttribute("src") !== beardSrc) {
-        img.onerror = () => { brokenPhotos.add(beardSrc); updateLabPhoto(); };
-        img.src = beardSrc;
+      const bimg = $("img", pic);
+      if (bimg.getAttribute("src") !== beard.src) {
+        bimg.onerror = () => { pic.hidden = true; };
+        bimg.src = beard.src;
       }
-      const beard = L.beards.find((b) => b.id === lab.beard);
-      $("figcaption", pic).textContent = local(beard);
+      $("figcaption", pic).textContent = local(L.beards.find((x) => x.id === lab.beard));
     }
   }
 
-  $("#labView").addEventListener("click", (e) => {
-    const b = e.target.closest("[data-view]");
-    if (!b) return;
-    labView = b.dataset.view;
-    store.set("labView", labView);
-    updateLabPhoto();
-  });
-
-  // fetch the lab photos shortly before the section comes into view
+  // Load every Fade Lab photo in the background once the page has settled,
+  // so a click on any fade shows its photo straight away.
   function preloadLabPhotos() {
-    const all = [...Object.values(labPhotos), ...Object.values(beardPhotos)].filter(Boolean);
-    if (!all.length || !("IntersectionObserver" in window)) return;
-    const io = new IntersectionObserver(([e]) => {
-      if (!e.isIntersecting) return;
-      io.disconnect();
-      all.forEach((src) => {
+    const go = () => {
+      Object.values(labPhotoInfo).forEach((i) => i.src && photoEl(i.src));
+      Object.values(beardPhotoInfo).forEach((i) => {
+        if (!i.src) return;
         const img = new Image();
         img.decoding = "async";
-        img.onerror = () => brokenPhotos.add(src);
-        img.src = src;
+        img.src = i.src;
       });
-    }, { rootMargin: "600px 0px" });
-    io.observe($("#lab"));
+    };
+    const idle = window.requestIdleCallback || ((f) => setTimeout(f, 300));
+    if (document.readyState === "complete") idle(go);
+    else window.addEventListener("load", () => idle(go), { once: true });
   }
 
   function touchLab() {
@@ -448,6 +440,9 @@
   let lookGroup = "all";
   const lookById = (id) => C.looks.find((l) => l.id === id);
   const visibleLooks = () => C.looks.filter((l) => lookGroup === "all" || l.group === lookGroup);
+  const lookNo = (l) => String(C.looks.indexOf(l) + 1).padStart(2, "0");
+  const upkeepText = (l) => (l.weeks ? (l.weeks === 1 ? t("upkeep1") : fill(t("upkeep"), { n: l.weeks })) : "");
+  const CLOCK = '<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>';
 
   function renderLookFilters() {
     const groups = [["all", t("all"), C.looks.length], ...Object.entries(C.lookGroups || {}).map(([k, v]) =>
@@ -456,38 +451,55 @@
       `<button type="button" class="pill" data-group="${k}" aria-pressed="${k === lookGroup}">${esc(label)}<small>${n}</small></button>`).join("");
   }
 
-  function lookCard(l, i) {
+  // When a photo is missing or fails, the card shows the style name on a striped panel.
+  const placeholder = (l) => `<span class="look__ph"><span>${esc(local(l))}</span></span>`;
+
+  function lookCard(l, copy) {
     const q = quote({ ...l, extras: l.extras });
     const ph = photoOf(l.photo);
     const group = C.lookGroups && C.lookGroups[l.group];
-    const upkeep = l.weeks ? (l.weeks === 1 ? t("upkeep1") : fill(t("upkeep"), { n: l.weeks })) : "";
-    return `<article class="look look--${(i % 6) + 1}" data-id="${esc(l.id)}">
-        <div class="look__art${ph.src ? " look__art--photo" : ""}">
-          <span class="look__n">${String(C.looks.indexOf(l) + 1).padStart(2, "0")}</span>
+    const tab = copy ? ' tabindex="-1"' : "";
+    return `<article class="look" data-id="${esc(l.id)}"${copy ? ' aria-hidden="true"' : ""}>
+        <div class="look__art">
+          ${ph.src ? `<img src="${esc(ph.src)}" alt="${esc(local(l))}" loading="lazy" decoding="async" draggable="false" />` : placeholder(l)}
+          <span class="look__n">${lookNo(l)}</span>
           ${group ? `<span class="look__group">${esc(local(group))}</span>` : ""}
-          ${ph.src
-            ? `<img src="${esc(ph.src)}" alt="${esc(local(l))}" loading="lazy" decoding="async" />${ph.credit ? `<a class="look__credit" href="${esc(ph.href || ph.src)}" target="_blank" rel="noopener">${esc(ph.credit)}</a>` : ""}`
-            : window.renderHead(l, "look-" + l.id)}
+          ${ph.src && ph.credit ? `<a class="look__credit" href="${esc(ph.href || ph.src)}" target="_blank" rel="noopener"${tab}>${esc(ph.credit)}</a>` : ""}
         </div>
         <div class="look__body">
           <h3 class="look__name">${esc(local(l))}</h3>
           ${l.d ? `<p class="look__desc">${esc(local(l.d))}</p>` : ""}
-          ${upkeep ? `<p class="look__upkeep"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>${esc(upkeep)}</p>` : ""}
+          ${l.weeks ? `<p class="look__upkeep">${CLOCK}${esc(upkeepText(l))}</p>` : ""}
           <div class="look__meta"><span>${q.min} ${t("min")}</span><b>${price(q.price)}</b></div>
-          <button type="button" class="look__try" data-look="${esc(l.id)}">${esc(t("tryIt"))}${ICON.arrow}</button>
+          <button type="button" class="look__try" data-open="${esc(l.id)}"${tab}>${esc(t("learnMore"))}${ICON.arrow}</button>
         </div>
       </article>`;
   }
 
+  /* ---------- the moving catalogue: an endless, full-width loop ---------- */
+  const rail = $("#looksRail");
+  const marquee = { x: 0, setW: 0, step: 320, speed: 0, vel: 0, drag: null, tween: null, inView: false, hover: false, holdUntil: 0, raf: 0, last: 0, count: 0 };
+
   function renderLooks() {
     renderLookFilters();
+    const looks = visibleLooks();
+    marquee.count = looks.length;
+    const one = looks.map((l) => lookCard(l, false)).join("");
+    const copyHtml = looks.map((l) => lookCard(l, true)).join("");
+    rail.innerHTML = one;
+    // enough copies that the loop never shows a gap, even on wide screens
     const track = $("#looksTrack");
-    track.innerHTML = visibleLooks().map(lookCard).join("") +
-      `<a class="look look--ig" href="${igUrl}" target="_blank" rel="noopener">
-        ${ICON.ig}<span>${esc(t("lookCta"))}</span><b>@${esc(C.instagram)} ↗</b>
-      </a>`;
-    track.scrollLeft = 0;
+    const setW = rail.scrollWidth + 18;
+    const copies = Math.max(3, Math.ceil((track.clientWidth * 3) / Math.max(setW, 1)));
+    rail.innerHTML = one + copyHtml.repeat(copies - 1);
+    measureMarquee();
+    // start mid-flow: the first card slightly cut at the left edge, cards filling the width
+    marquee.x = -marquee.setW - marquee.step * 0.22;
+    marquee.vel = 0;
+    marquee.tween = null;
+    applyMarquee();
     renderFade101();
+    if (sheetId && !lookById(sheetId)) closeSheet();
 
     const photos = $("#photos");
     if (C.photos.gallery.length) {
@@ -497,46 +509,184 @@
     }
   }
 
-  // A small visual guide: the same client with each fade height, so the names make sense.
+  function measureMarquee() {
+    const kids = rail.children;
+    const n = marquee.count;
+    marquee.setW = kids[n] ? kids[n].offsetLeft - kids[0].offsetLeft : rail.scrollWidth;
+    marquee.step = kids[1] ? kids[1].offsetLeft - kids[0].offsetLeft : 320;
+  }
+
+  // keep the visible part inside the copies; returns how far it jumped
+  function wrapMarquee() {
+    const w = marquee.setW;
+    if (!w) return 0;
+    let shift = 0;
+    while (marquee.x <= -2 * w) { marquee.x += w; shift += w; }
+    while (marquee.x > -w) { marquee.x -= w; shift -= w; }
+    return shift;
+  }
+
+  function applyMarquee() {
+    rail.style.transform = `translate3d(${marquee.x.toFixed(2)}px, 0, 0)`;
+  }
+
+  // A small visual guide: real photos of each fade height with a gauge showing where the blend starts.
   function renderFade101() {
-    const fades = ["low", "mid", "high", "skin"];
+    const fades = [["low", 0.25], ["mid", 0.5], ["high", 0.75], ["skin", 0.25]];
     $("#fade101").innerHTML = `
       <div class="fade101__head"><h3>${esc(t("f101Title"))}</h3><p>${esc(t("f101Lead"))}</p></div>
-      <div class="fade101__row">${fades.map((f, i) => {
+      <div class="fade101__row">${fades.map(([f, h], i) => {
         const name = local(L.fades.find((x) => x.id === f));
+        const ph = labPhotoInfo[f] || {};
         return `<button type="button" class="fade101__item" data-fade101="${f}">
-          <span class="fade101__art">${window.renderHead({ fade: f, top: 30, beard: "none", extras: [], marker: true }, "f101-" + f)}</span>
+          <span class="fade101__art">
+            ${ph.src ? `<img src="${esc(ph.src)}" alt="${esc(name)}" loading="lazy" decoding="async" />` : ""}
+            <span class="gauge${f === "skin" ? " gauge--skin" : ""}" style="--h:${h}" aria-hidden="true"><i></i></span>
+          </span>
           <span class="fade101__n">0${i + 1}</span>
           <b>${esc(name)}</b><small>${esc(t("f101")[f])}</small>
         </button>`;
       }).join("")}</div>`;
   }
 
+  /* ---------- style guide panel ---------- */
+  let sheetId = null, sheetReturn = null;
+  function openSheet(id) {
+    const l = lookById(id);
+    if (!l) return;
+    if (!sheetId) sheetReturn = document.activeElement;
+    sheetId = id;
+    const list = visibleLooks();
+    const pos = list.indexOf(l);
+    const ph = photoOf(l.photo);
+    const group = C.lookGroups && C.lookGroups[l.group];
+    const q = quote({ ...l, extras: l.extras });
+    $("#sheetPanel").innerHTML = `
+      <button type="button" class="sheet__close" data-close aria-label="${esc(t("close"))}">×</button>
+      <div class="sheet__media">
+        ${ph.src ? `<img src="${esc(ph.src)}" alt="${esc(local(l))}" />` : placeholder(l)}
+        ${group ? `<span class="look__group">${esc(local(group))}</span>` : ""}
+        ${ph.credit ? `<a class="look__credit" href="${esc(ph.href || ph.src)}" target="_blank" rel="noopener">${esc(ph.credit)}</a>` : ""}
+      </div>
+      <div class="sheet__body">
+        <p class="sheet__n">${lookNo(l)} · ${esc(group ? local(group) : "")}</p>
+        <h3 class="sheet__title" id="sheetTitle">${esc(local(l))}</h3>
+        <p class="sheet__desc">${esc(local(l.d))}</p>
+        <dl class="sheet__facts">
+          ${l.ask ? `<div><dt>${esc(t("askTitle"))}</dt><dd>${esc(local(l.ask))}</dd></div>` : ""}
+          ${l.suits ? `<div><dt>${esc(t("suitsTitle"))}</dt><dd>${esc(local(l.suits))}</dd></div>` : ""}
+          ${l.how ? `<div><dt>${esc(t("howTitle"))}</dt><dd>${esc(local(l.how))}</dd></div>` : ""}
+        </dl>
+        <div class="sheet__meta">
+          ${l.weeks ? `<span>${CLOCK}${esc(upkeepText(l))}</span>` : ""}
+          <span>${q.min} ${t("min")}</span>
+          <b>${price(q.price)}</b>
+        </div>
+        <div class="sheet__actions">
+          <button type="button" class="btn btn--red btn--lg" data-sheet-book>${esc(t("bookStyle"))}${ICON.arrow}</button>
+          <button type="button" class="btn btn--line btn--lg" data-sheet-lab>${esc(t("tryIt"))}</button>
+        </div>
+        <div class="sheet__nav">
+          <button type="button" class="round round--dark" data-sheet-step="-1" aria-label="${esc(t("prevStyle"))}"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></button>
+          <span>${pos + 1} / ${list.length}</span>
+          <button type="button" class="round round--dark" data-sheet-step="1" aria-label="${esc(t("nextStyle"))}"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+        </div>
+      </div>`;
+    const sheet = $("#sheet");
+    const wasHidden = sheet.hidden;
+    sheet.hidden = false;
+    document.body.classList.add("sheet-open");
+    if (wasHidden) requestAnimationFrame(() => sheet.classList.add("is-on"));
+    $(".sheet__close", sheet).focus({ preventScroll: true });
+    $(".sheet__panel", sheet).scrollTop = 0;
+  }
+  function closeSheet() {
+    const sheet = $("#sheet");
+    if (sheet.hidden) return;
+    sheetId = null;
+    sheet.classList.remove("is-on");
+    document.body.classList.remove("sheet-open");
+    setTimeout(() => { if (!sheetId) sheet.hidden = true; }, 300);
+    if (sheetReturn && sheetReturn.focus) sheetReturn.focus({ preventScroll: true });
+  }
+  function setupSheet() {
+    const sheet = $("#sheet");
+    sheet.addEventListener("click", (e) => {
+      if (e.target.closest("[data-close]")) return closeSheet();
+      const step = e.target.closest("[data-sheet-step]");
+      if (step) {
+        const list = visibleLooks();
+        const i = list.findIndex((l) => l.id === sheetId);
+        const n = list[(i + Number(step.dataset.sheetStep) + list.length) % list.length];
+        return openSheet(n.id);
+      }
+      if (e.target.closest("[data-sheet-lab]")) {
+        const id = sheetId;
+        closeSheet();
+        return loadLook(id);
+      }
+      if (e.target.closest("[data-sheet-book]")) {
+        const look = lookById(sheetId);
+        closeSheet();
+        Object.assign(lab, { fade: look.fade, top: look.top, beard: look.beard, extras: new Set(look.extras) });
+        touchLab();
+        renderLabControls();
+        updateLab(true);
+        book.service = "lab";
+        renderSvc();
+        renderSlots();
+        renderTicket();
+        $("#book").scrollIntoView({ behavior: smooth });
+        toast(t("added"));
+      }
+    });
+    document.addEventListener("keydown", (e) => {
+      if (!sheetId) return;
+      if (e.key === "Escape") closeSheet();
+      if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
+        const b = $(`[data-sheet-step="${e.key === "ArrowRight" ? 1 : -1}"]`, sheet);
+        if (b && !e.target.closest("input, textarea")) b.click();
+      }
+      if (e.key === "Tab") {
+        // keep focus inside the panel
+        const f = $$("button, a[href]", $("#sheetPanel"));
+        if (!f.length) return;
+        if (e.shiftKey && document.activeElement === f[0]) { e.preventDefault(); f[f.length - 1].focus(); }
+        else if (!e.shiftKey && document.activeElement === f[f.length - 1]) { e.preventDefault(); f[0].focus(); }
+      }
+    });
+  }
+
   function setupLookTrack() {
     const track = $("#looksTrack");
-    // a look photo that fails to load falls back to its drawing
-    track.addEventListener("error", (e) => {
+    const m = marquee;
+    const BASE = () => (innerWidth < 700 ? 34 : 46); // px per second
+
+    // a photo that fails to load is replaced by the striped name panel
+    rail.addEventListener("error", (e) => {
       const img = e.target;
       if (img.tagName !== "IMG") return;
       const card = img.closest(".look");
       const look = card && lookById(card.dataset.id);
       if (!look) return;
-      const art = img.parentElement;
-      art.classList.remove("look__art--photo");
-      art.querySelector(".look__credit")?.remove();
-      img.outerHTML = window.renderHead(look, "look-" + look.id);
+      card.querySelector(".look__credit")?.remove();
+      img.outerHTML = placeholder(look);
     }, true);
-    track.addEventListener("click", (e) => {
-      const b = e.target.closest("[data-look]");
-      if (b) loadLook(b.dataset.look);
+
+    // open the guide; a drag never counts as a click
+    rail.addEventListener("click", (e) => {
+      if (track.classList.contains("is-drag")) { e.preventDefault(); e.stopPropagation(); return; }
+      if (e.target.closest(".look__credit")) return;
+      const card = e.target.closest(".look");
+      if (card) openSheet(card.dataset.id);
     });
+
     $("#looksFilters").addEventListener("click", (e) => {
       const b = e.target.closest("[data-group]");
       if (!b || b.dataset.group === lookGroup) return;
       lookGroup = b.dataset.group;
       renderLooks();
-      syncNav();
-      restartAuto();
+      kick();
     });
     $("#fade101").addEventListener("click", (e) => {
       const b = e.target.closest("[data-fade101]");
@@ -548,71 +698,121 @@
       $("#lab").scrollIntoView({ behavior: smooth });
     });
 
-    const gap = 18;
-    const step = () => ($(".look", track)?.getBoundingClientRect().width || 300) + gap;
-    const atEnd = () => track.scrollLeft + track.clientWidth >= track.scrollWidth - 8;
-    const next = () => {
-      if (atEnd()) track.scrollTo({ left: 0, behavior: smooth });
-      else track.scrollBy({ left: step(), behavior: smooth });
+    // arrows and keys glide one card
+    const glide = (dir) => {
+      m.vel = 0;
+      m.tween = { from: m.x, to: m.x - dir * m.step, t0: performance.now(), dur: 650 };
+      m.holdUntil = Date.now() + 3500;
+      kick();
     };
-    $("#looksPrev").addEventListener("click", () => { track.scrollBy({ left: -step(), behavior: smooth }); pauseAuto(); });
-    $("#looksNext").addEventListener("click", () => { next(); pauseAuto(); });
-    function syncNav() {
-      $("#looksPrev").disabled = track.scrollLeft < 8;
-      $("#looksNext").disabled = false;
-    }
-    track.addEventListener("scroll", syncNav, { passive: true });
-    syncNav();
+    $("#looksPrev").addEventListener("click", () => glide(-1));
+    $("#looksNext").addEventListener("click", () => glide(1));
+    track.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowRight") { e.preventDefault(); glide(1); }
+      if (e.key === "ArrowLeft") { e.preventDefault(); glide(-1); }
+    });
 
-    // drag to scroll with a mouse
-    let drag = null;
+    // drag (mouse) and swipe (touch); vertical swipes still scroll the page
     track.addEventListener("pointerdown", (e) => {
-      pauseAuto();
-      if (e.pointerType !== "mouse" || e.button !== 0) return;
-      drag = { x: e.clientX, left: track.scrollLeft, moved: false };
+      if (e.button !== 0) return;
+      m.tween = null;
+      m.vel = 0;
+      m.drag = { id: e.pointerId, x0: e.clientX, start: m.x, lx: e.clientX, lt: performance.now(), v: 0, moved: false };
+      kick();
     });
     window.addEventListener("pointermove", (e) => {
-      if (!drag) return;
-      const dx = e.clientX - drag.x;
-      if (!drag.moved && Math.abs(dx) > 6) { drag.moved = true; track.classList.add("is-drag"); }
-      if (drag.moved) track.scrollLeft = drag.left - dx;
-    });
-    window.addEventListener("pointerup", () => {
-      if (!drag) return;
-      const moved = drag.moved;
-      drag = null;
-      if (moved) setTimeout(() => track.classList.remove("is-drag"), 0);
-    });
-
-    /* ---------- autoplay: slides one card every few seconds ---------- */
-    const DELAY = 3600;
-    const bar = $("#looksBar");
-    let timer = 0, inView = false, hover = false, pausedUntil = 0;
-    const canPlay = () => !reduceMotion && inView && !hover && !document.hidden && Date.now() >= pausedUntil;
-    function tick() {
-      clearTimeout(timer);
-      bar.classList.remove("is-run");
-      if (!canPlay()) {
-        if (Date.now() < pausedUntil) timer = setTimeout(tick, pausedUntil - Date.now() + 50);
-        return;
+      const d = m.drag;
+      if (!d || e.pointerId !== d.id) return;
+      const dx = e.clientX - d.x0;
+      if (!d.moved && Math.abs(dx) > 6) {
+        d.moved = true;
+        track.classList.add("is-drag");
+        try { track.setPointerCapture(d.id); } catch { /* ignore */ }
       }
-      void bar.offsetWidth;
-      bar.style.animationDuration = DELAY + "ms";
-      bar.classList.add("is-run");
-      timer = setTimeout(() => { if (canPlay()) next(); tick(); }, DELAY);
+      if (!d.moved) return;
+      const now = performance.now();
+      const dt = Math.max(1, now - d.lt);
+      d.v = 0.8 * ((e.clientX - d.lx) / dt) * 1000 + 0.2 * d.v;
+      d.lx = e.clientX;
+      d.lt = now;
+      m.x = d.start + dx;
+      d.start += wrapMarquee();
+      applyMarquee();
+    });
+    const release = (e) => {
+      const d = m.drag;
+      if (!d || (e && e.pointerId !== d.id)) return;
+      m.drag = null;
+      if (d.moved) {
+        m.vel = clamp(d.v, -2500, 2500);
+        m.holdUntil = Date.now() + 2500;
+        setTimeout(() => track.classList.remove("is-drag"), 0);
+      }
+      kick();
+    };
+    window.addEventListener("pointerup", release);
+    window.addEventListener("pointercancel", release);
+
+    if (finePointer) {
+      track.addEventListener("mouseenter", () => { m.hover = true; });
+      track.addEventListener("mouseleave", () => { m.hover = false; kick(); });
     }
-    function pauseAuto() { pausedUntil = Date.now() + 7000; tick(); }
-    function restartAuto() { pausedUntil = 0; tick(); }
-    track.addEventListener("mouseenter", () => { hover = true; tick(); });
-    track.addEventListener("mouseleave", () => { hover = false; tick(); });
-    track.addEventListener("focusin", () => { hover = true; tick(); });
-    track.addEventListener("focusout", () => { hover = false; tick(); });
-    track.addEventListener("touchstart", pauseAuto, { passive: true });
-    track.addEventListener("wheel", (e) => { if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) pauseAuto(); }, { passive: true });
-    document.addEventListener("visibilitychange", tick);
+    track.addEventListener("focusin", () => { m.hover = true; });
+    track.addEventListener("focusout", () => { m.hover = false; kick(); });
+
+    function frame(now) {
+      m.raf = 0;
+      const dt = Math.min(0.05, (now - (m.last || now)) / 1000);
+      m.last = now;
+      const want = !reduceMotion && !m.hover && !m.drag && !m.tween && !sheetId && Date.now() >= m.holdUntil ? BASE() : 0;
+      m.speed += (want - m.speed) * Math.min(1, dt * 3);
+
+      if (m.tween) {
+        const k = Math.min(1, (now - m.tween.t0) / m.tween.dur);
+        const e = 1 - Math.pow(1 - k, 3);
+        m.x = m.tween.from + (m.tween.to - m.tween.from) * e;
+        if (k >= 1) m.tween = null;
+      } else if (!m.drag) {
+        m.x -= m.speed * dt;
+        if (m.vel) {
+          m.x += m.vel * dt;
+          m.vel *= Math.pow(0.05, dt);
+          if (Math.abs(m.vel) < 8) m.vel = 0;
+        }
+      }
+      const shift = wrapMarquee();
+      if (shift && m.tween) { m.tween.from += shift; m.tween.to += shift; }
+      applyMarquee();
+
+      const busy = m.tween || m.vel || m.drag || m.speed > 0.5 || want;
+      if (m.inView && !document.hidden && busy) m.raf = requestAnimationFrame(frame);
+      else m.last = 0;
+    }
+    function kick() {
+      if (!m.raf && m.inView && !document.hidden) {
+        m.last = 0;
+        m.raf = requestAnimationFrame(frame);
+      }
+    }
+    marquee.kick = kick;
+    document.addEventListener("visibilitychange", kick);
     if ("IntersectionObserver" in window) {
-      new IntersectionObserver(([e]) => { inView = e.isIntersecting; tick(); }, { threshold: 0.35 }).observe(track);
+      new IntersectionObserver(([e]) => { m.inView = e.isIntersecting; kick(); }).observe(track);
+    } else {
+      m.inView = true;
     }
+    // card sizes follow the window width
+    let rw = innerWidth, rt;
+    window.addEventListener("resize", () => {
+      clearTimeout(rt);
+      rt = setTimeout(() => {
+        if (Math.abs(innerWidth - rw) < 2) return;
+        rw = innerWidth;
+        renderLooks();
+        kick();
+      }, 200);
+    });
+    setInterval(kick, 1000); // resumes after holds and hovers end
   }
 
   /* ======================================================================
@@ -1174,6 +1374,7 @@
 
   setupHero();
   setupLookTrack();
+  setupSheet();
   preloadLabPhotos();
   setupPointerFx();
   renderMap();

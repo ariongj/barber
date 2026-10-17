@@ -7,8 +7,8 @@ A fast, single-page site with no build step and no dependencies. It is in **Alba
 ## What makes it different
 
 - **Black-to-barber-pole reveal.** The page opens on black. A moment after it loads, the black lifts away in panels with a red, white and blue edge, and the striped Privé wordmark rolls in. It goes straight to the striped wordmark for people who ask for reduced motion.
-- **Fade Lab.** Build a cut on an illustrated client: fade height, length on top, beard and extras. The drawing, price and duration update live, and "Book this cut" puts exactly that cut into the booking form.
-- **Style catalogue.** 18 styles in groups (Fade & taper, Classic, Short, Long, Beard) with filter buttons. Each card has a real photo, a short explanation of the style, how often it needs a touch-up, its time and price, and "Try it" to load it into the Fade Lab. The cards slide by themselves, pausing while someone hovers, swipes or reads. Below them, "Fade 101" shows the same client with a low, mid, high and skin fade, with a marker where each one starts.
+- **Fade Lab.** Choose fade height, length on top, beard and extras. A real photo of the chosen fade (and beard) fills the stage, switching instantly, while the price and time update live. "Book this cut" puts exactly that cut into the booking form.
+- **Style catalogue.** 18 styles in groups (Fade & taper, Classic, Short, Long, Beard) with filter buttons, running as an endless full-width strip that keeps moving (it slows to a stop on hover, and can be dragged or swiped). Each card opens a guide: what the style is, how to ask your barber for it, who it suits, how to style it, how often it needs a touch-up, time and price, with "Book this style" and "Try it in the Fade Lab". Below, "Fade 101" shows real photos of low, mid, high and skin fades with a gauge marking where each starts.
 - **Booking ticket.** Pick a service, a day and a free time slot. The slots follow the opening hours and the length of the service, and past times are hidden. A barber-style ticket with a number and barcode fills in as you go, then gets stamped when sent:
   - If a WhatsApp number is set, the request opens in WhatsApp with the message written out.
   - Otherwise the message is copied and Instagram DMs open (`ig.me/m/privehairstudioks`), so booking works with only the Instagram account.
@@ -28,8 +28,8 @@ Everything about the shop is in **`js/config.js`**:
 | `hours` | Opening hours per day (`null` = closed). Drives the open badge, the dial and the booking slots |
 | `services` | The price list: name (sq/en), description, price in €, minutes. `featured: true` adds a "Signature" tag |
 | `lab` | Fade Lab prices and times: base price per fade, scissor extra for long tops, beard styles, extras |
-| `lab.photos` | Real photos per fade and beard style (files in `assets/img/lab/`). When the chosen fade has one, the Fade Lab shows the photo, with a small drawing of the exact combination; otherwise it shows the drawing. Visitors can switch between Photo and Illustration |
-| `lookGroups`, `looks` | The style catalogue: groups, and for each style its group, explanation (`d`), touch-up interval (`weeks`), photo with credit, and the settings "Try it" loads into the Fade Lab |
+| `lab.photos` | Real photos per fade and beard style, shown in the Fade Lab and Fade 101. A style without a photo shows its name on a striped panel |
+| `lookGroups`, `looks` | The style catalogue: groups, and for each style its explanation (`d`), how to ask for it (`ask`), who it suits (`suits`), how to style it (`how`), touch-up interval (`weeks`), photo with credit, and the settings "Try it" loads into the Fade Lab |
 | `photos.gallery` | Put photos in `assets/img/` and list them. They appear under the lookbook |
 
 Empty fields are hidden automatically. Page text lives in `index.html` (Albanian) and `js/i18n.js` (English).
@@ -47,7 +47,6 @@ index.html        page structure (Albanian text)
 css/styles.css    all styling
 js/config.js      shop details, prices, hours
 js/i18n.js        English text + runtime strings
-js/head.js        the illustrated client used by the Fade Lab, Fade 101 and as a photo fallback
 js/main.js        everything else
 ```
 

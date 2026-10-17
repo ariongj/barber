@@ -138,14 +138,9 @@
             <div class="lab__mirror" aria-hidden="true">
               <svg viewBox="0 0 200 200"><defs><path id="mirrorPath" d="M100,100 m-90,0 a90,90 0 1,1 180,0 a90,90 0 1,1 -180,0"/></defs><text><textPath href="#mirrorPath">FADE LAB ✦ PRIVÉ HAIR STUDIO ✦ FADE LAB ✦ PRIVÉ HAIR STUDIO ✦</textPath></text></svg>
             </div>
-            <div class="lab__head" id="labHead"></div>
             <div class="lab__tag" id="labTag" aria-live="polite"></div>
-            <div class="lab__view" id="labView" role="group" data-i18n-attr="aria-label:lab.view" aria-label="Pamja" hidden>
-              <button type="button" data-view="photo" aria-pressed="true" data-i18n="lab.photo">Foto</button>
-              <button type="button" data-view="draw" aria-pressed="false" data-i18n="lab.draw">Ilustrim</button>
-            </div>
             <figure class="lab__beardpic" id="labBeardPic" hidden><img alt="" decoding="async" /><figcaption></figcaption></figure>
-            <p class="lab__caption" id="labCaption" hidden><b></b><span><span data-i18n="lab.ref">Foto ilustruese</span><a class="lab__credit" id="labCredit" target="_blank" rel="noopener"></a></span></p>
+            <p class="lab__caption" id="labCaption"><b></b><span><span data-i18n="lab.ref">Foto shembull</span><a class="lab__credit" id="labCredit" target="_blank" rel="noopener"></a></span></p>
           </div>
 
           <div class="lab__panel reveal">
@@ -207,9 +202,9 @@
         </div>
         <div class="looks__filters reveal" id="looksFilters" role="group" data-i18n-attr="aria-label:looks.groups" aria-label="Grupet e stileve"></div>
       </div>
-      <div class="looks__track" id="looksTrack" tabindex="0" data-i18n-attr="aria-label:looks.kicker" aria-label="Stilet"></div>
+      <div class="looks__track" id="looksTrack" tabindex="0" data-i18n-attr="aria-label:looks.kicker" aria-label="Stilet"><div class="looks__rail" id="looksRail"></div></div>
       <div class="container">
-        <div class="looks__progress" aria-hidden="true"><span id="looksBar"></span></div>
+        <a class="looks__ig js-ig" href="https://www.instagram.com/privehairstudioks/" target="_blank" rel="noopener"><span data-i18n="looks.ig">Shiko më shumë punë në Instagram</span> <b class="js-ig-handle">@privehairstudioks</b> ↗</a>
         <div class="fade101 reveal" id="fade101"></div>
         <div class="photos" id="photos" hidden></div>
       </div>
@@ -355,11 +350,16 @@
     <a class="btn btn--red dock__book" href="#book" data-i18n="cta.book">Rezervo termin</a>
   </div>
 
+  <!-- Style guide: opens from the catalogue -->
+  <div class="sheet" id="sheet" hidden>
+    <div class="sheet__backdrop" data-close></div>
+    <article class="sheet__panel" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" id="sheetPanel"></article>
+  </div>
+
   <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
   <script src="js/config.js"></script>
   <script src="js/i18n.js"></script>
-  <script src="js/head.js"></script>
   <script src="js/main.js"></script>
 </body>
 </html>
