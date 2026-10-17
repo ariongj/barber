@@ -101,14 +101,14 @@ window.PRIVE = {
   },
 
   // Lookbook: ready-made looks shown as cards; "Try it" loads them into the Fade Lab.
-  // Add `photo: "assets/img/looks/name.jpg"` to a look to show a real photo instead of the drawing.
+  // `photo` shows a real photo on the card (a path/URL, or { src, credit, href }); without it the card shows the drawing.
   looks: [
-    { id: "low",   fade: "low",   top: 30, beard: "none",    extras: [],                 sq: "Low fade",       en: "Low fade" },
-    { id: "skin",  fade: "skin",  top: 18, beard: "stubble", extras: ["lineup"],         sq: "Skin fade",      en: "Skin fade" },
-    { id: "mid",   fade: "mid",   top: 45, beard: "short",   extras: ["part"],           sq: "Mid fade + part", en: "Mid fade + part" },
-    { id: "taper", fade: "taper", top: 55, beard: "full",    extras: ["towel"],          sq: "Taper & mjekër", en: "Taper & beard" },
-    { id: "high",  fade: "high",  top: 12, beard: "none",    extras: ["lineup"],         sq: "High & tight",   en: "High & tight" },
-    { id: "buzz",  fade: "none",  top: 3,  beard: "stubble", extras: [],                 sq: "Buzz cut",       en: "Buzz cut" }
+    { id: "low",   fade: "low",   top: 30, beard: "none",    extras: [], photo: { src: "https://unsplash.com/photos/CCTCHXEsan8/download?w=900", credit: "John Arano / Unsplash", href: "https://unsplash.com/photos/CCTCHXEsan8" }, sq: "Low fade",       en: "Low fade" },
+    { id: "skin",  fade: "skin",  top: 18, beard: "stubble", extras: ["lineup"], photo: { src: "https://commons.wikimedia.org/wiki/Special:FilePath/Fade_Hair_Cut.jpg?width=900", credit: "Truth678 / Wikimedia Commons, CC BY-SA 4.0", href: "https://commons.wikimedia.org/wiki/File:Fade_Hair_Cut.jpg" }, sq: "Skin fade",      en: "Skin fade" },
+    { id: "mid",   fade: "mid",   top: 45, beard: "short",   extras: ["part"], photo: { src: "https://unsplash.com/photos/jzGDfI9GMS0/download?w=900", credit: "Hair Spies / Unsplash", href: "https://unsplash.com/photos/jzGDfI9GMS0" }, sq: "Mid fade + part", en: "Mid fade + part" },
+    { id: "taper", fade: "taper", top: 55, beard: "full",    extras: ["towel"], photo: { src: "https://unsplash.com/photos/z0Cyh9nGLFY/download?w=900", credit: "Unsplash", href: "https://unsplash.com/photos/z0Cyh9nGLFY" }, sq: "Taper & mjekër", en: "Taper & beard" },
+    { id: "high",  fade: "high",  top: 12, beard: "none",    extras: ["lineup"], photo: { src: "https://unsplash.com/photos/FtYpeIRDzaw/download?w=900", credit: "Hair Spies / Unsplash", href: "https://unsplash.com/photos/FtYpeIRDzaw" }, sq: "High & tight",   en: "High & tight" },
+    { id: "buzz",  fade: "none",  top: 3,  beard: "stubble", extras: [], photo: { src: "https://unsplash.com/photos/5D9ixjUmWQg/download?w=900", credit: "Karsten Winegeart / Unsplash", href: "https://unsplash.com/photos/5D9ixjUmWQg" }, sq: "Buzz cut",       en: "Buzz cut" }
   ],
 
   // Photos: put files in assets/img/ and list them here, e.g. "assets/img/cut-1.jpg".

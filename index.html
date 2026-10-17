@@ -36,18 +36,6 @@
   <!-- Scroll progress: a barber pole -->
   <div class="pole-progress" aria-hidden="true"><div class="pole-progress__tube"><span id="poleFill"></span></div></div>
 
-  <!-- Clipper cursor for the hero (fine pointers only) -->
-  <div class="clipper" id="clipper" aria-hidden="true">
-    <svg viewBox="0 0 64 120">
-      <rect x="12" y="34" width="40" height="80" rx="16" fill="#efe8dc"/>
-      <rect x="12" y="34" width="40" height="80" rx="16" fill="none" stroke="#0f0e0d" stroke-width="2.5"/>
-      <rect x="20" y="58" width="24" height="5" rx="2.5" fill="#d23b2a"/>
-      <rect x="27" y="74" width="10" height="26" rx="5" fill="#0f0e0d" opacity=".18"/>
-      <path d="M8 34 h48 v-12 h-48 z" fill="#0f0e0d"/>
-      <g fill="#c9c2b6"><rect x="10" y="6" width="4" height="16"/><rect x="17" y="6" width="4" height="16"/><rect x="24" y="6" width="4" height="16"/><rect x="31" y="6" width="4" height="16"/><rect x="38" y="6" width="4" height="16"/><rect x="45" y="6" width="4" height="16"/><rect x="50" y="6" width="4" height="16"/></g>
-    </svg>
-  </div>
-
   <!-- Header -->
   <header class="header" id="header">
     <div class="header__bar">
@@ -77,7 +65,7 @@
   </header>
 
   <main>
-    <!-- Hero: shave the screen -->
+    <!-- Hero: the hair drops away to reveal the barber-pole colours -->
     <section class="hero" id="top" aria-labelledby="heroTitle">
       <div class="hero__skin" aria-hidden="true">
         <div class="hero__word">PRIVÉ</div>
@@ -94,17 +82,6 @@
               <a class="btn btn--red btn--lg" href="#book" data-magnetic><span data-i18n="cta.book">Rezervo termin</span><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
               <a class="btn btn--bone btn--lg" href="#lab" data-magnetic><span data-i18n="cta.lab">Ndërto prerjen</span></a>
             </div>
-          </div>
-          <div class="cutmeter" id="cutmeter">
-            <svg class="cutmeter__ring" viewBox="0 0 120 120" aria-hidden="true">
-              <circle cx="60" cy="60" r="52" class="cutmeter__track"/>
-              <circle cx="60" cy="60" r="52" class="cutmeter__bar" id="cutBar"/>
-            </svg>
-            <div class="cutmeter__inner">
-              <b id="cutPct">0%</b>
-            </div>
-            <p class="cutmeter__hint" id="cutHint"></p>
-            <button type="button" class="cutmeter__grow" id="growBtn" hidden data-i18n="hero.grow">Rriti prapë ↺</button>
           </div>
         </div>
       </div>

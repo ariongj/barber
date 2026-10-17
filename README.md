@@ -6,7 +6,7 @@ A fast, single-page site with no build step and no dependencies. It is in **Alba
 
 ## What makes it different
 
-- **Shave the screen.** The hero is covered in hair. Your cursor becomes a pair of clippers (on phones, swipe sideways). Cut enough and the rest falls away to reveal the striped Privé wordmark. On load, the clippers make one pass by themselves to show how it works, and "Grow it back" resets it.
+- **Hair-to-barber-pole reveal.** The page opens on a screen covered in hair. A moment after it loads, the hair drops away in clumps and the striped red, white and blue Privé wordmark rolls in. It skips straight to the striped wordmark for people who ask for reduced motion.
 - **Fade Lab.** Build a cut on an illustrated client: fade height, length on top, beard and extras. The drawing, price and duration update live, and "Book this cut" puts exactly that cut into the booking form.
 - **Lookbook.** Ready-made looks (low fade, skin fade, taper & beard…) drawn by the same renderer. Drag or swipe through them, and "Try it" loads one into the Fade Lab.
 - **Booking ticket.** Pick a service, a day and a free time slot. The slots follow the opening hours and the length of the service, and past times are hidden. A barber-style ticket with a number and barcode fills in as you go, then gets stamped when sent:
@@ -48,7 +48,7 @@ index.html        page structure (Albanian text)
 css/styles.css    all styling
 js/config.js      shop details, prices, hours
 js/i18n.js        English text + runtime strings
-js/hair.js        the hair canvas in the hero
+js/hair.js        the hair curtain that drops away in the hero
 js/head.js        the illustrated client used by Fade Lab and the lookbook
 js/main.js        everything else
 ```

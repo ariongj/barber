@@ -122,77 +122,24 @@
   }
 
   /* ======================================================================
-     Hero: shave the screen
+     Hero: the hair drops away to reveal the barber-pole colours
      ====================================================================== */
   const hero = $(".hero");
-  const clipper = $("#clipper");
   let hair = null;
-  const THRESHOLD = 0.42;
 
-  function setCut(p) {
-    const pct = Math.round(clamp(p / THRESHOLD, 0, 1) * 100);
-    $("#cutPct").textContent = pct + "%";
-    $("#cutBar").style.strokeDashoffset = String(326.7 * (1 - pct / 100));
-  }
-  function renderHint() {
-    const shaved = hero.classList.contains("is-shaved");
-    $("#cutHint").textContent = shaved ? t("hintDone") : finePointer ? t("hintMouse") : t("hintTouch");
-  }
-
-  let buzzTimer;
-  function moveClipper(x, y) {
-    const angle = clamp((x - (moveClipper.lx ?? x)) * 1.6, -28, 28);
-    moveClipper.lx = x;
-    clipper.style.transform = `translate(${x - 19}px, ${y - 8}px) rotate(${angle}deg)`;
-  }
-  function buzz() {
-    if (!clipper.classList.contains("is-buzz")) clipper.classList.add("is-buzz");
-    clearTimeout(buzzTimer);
-    buzzTimer = setTimeout(() => clipper.classList.remove("is-buzz"), 120);
+  function reveal() {
+    hero.classList.add("is-shaved");
   }
 
   function setupHero() {
     const canvas = $("#hair");
-    if (reduceMotion || !canvas.getContext || !window.HairField) {
+    // skip the curtain when motion is reduced, or when the page opens scrolled past the hero
+    if (reduceMotion || !canvas.getContext || !window.HairCurtain || scrollY > innerHeight * 0.5) {
       document.body.classList.add("no-hair");
-      hero.classList.add("is-shaved");
-      setCut(1);
+      reveal();
       return;
     }
-    hair = new window.HairField(hero, canvas, {
-      threshold: THRESHOLD,
-      onProgress: setCut,
-      onCut: buzz,
-      onDone: () => {
-        hero.classList.add("is-shaved");
-        $("#growBtn").hidden = false;
-        renderHint();
-      },
-      onDemoMove: (x, y, active) => {
-        if (!finePointer) return;
-        const r = hero.getBoundingClientRect();
-        moveClipper(r.left + x, r.top + y);
-        clipper.classList.toggle("is-on", active);
-        if (active) buzz();
-      }
-    });
-    $("#growBtn").addEventListener("click", () => {
-      hero.classList.remove("is-shaved");
-      $("#growBtn").hidden = true;
-      hair.grow();
-      renderHint();
-    });
-
-    if (finePointer) {
-      document.body.classList.add("has-clipper");
-      hero.addEventListener("pointermove", (e) => {
-        if (hair.demoing) return;
-        const overUi = e.target.closest("a, button, .header");
-        clipper.classList.toggle("is-on", !overUi && hair.state !== "done");
-        moveClipper(e.clientX, e.clientY);
-      });
-      hero.addEventListener("pointerleave", () => clipper.classList.remove("is-on"));
-    }
+    hair = new window.HairCurtain(hero, canvas);
   }
 
   /* ======================================================================
@@ -208,7 +155,10 @@
         loader.classList.add("is-done");
         document.body.classList.remove("is-loading");
         setTimeout(() => loader.remove(), 800);
-        if (hair) setTimeout(() => hair.demo(1700), 650);
+        if (hair) setTimeout(() => {
+          hero.classList.add("is-dropping");
+          hair.drop(() => { reveal(); document.body.classList.add("no-hair"); });
+        }, 1100);
       }, reduceMotion ? 0 : wait);
     });
   }
@@ -502,9 +452,10 @@
     const track = $("#looksTrack");
     track.innerHTML = C.looks.map((l, i) => {
       const q = quote({ ...l, extras: l.extras });
+      const ph = photoOf(l.photo);
       return `<article class="look look--${(i % 6) + 1}">
-        <div class="look__art${l.photo ? " look__art--photo" : ""}"><span class="look__n">0${i + 1}</span>${l.photo
-          ? `<img src="${esc(l.photo)}" alt="${esc(local(l))}" loading="lazy" decoding="async" />`
+        <div class="look__art${ph.src ? " look__art--photo" : ""}"><span class="look__n">0${i + 1}</span>${ph.src
+          ? `<img src="${esc(ph.src)}" alt="${esc(local(l))}" loading="lazy" decoding="async" />${ph.credit ? `<a class="look__credit" href="${esc(ph.href || ph.src)}" target="_blank" rel="noopener">${esc(ph.credit)}</a>` : ""}`
           : window.renderHead(l, "look" + i)}</div>
         <div class="look__body">
           <h3 class="look__name">${esc(local(l))}</h3>
@@ -534,7 +485,9 @@
       const i = $$(".look", track).indexOf(card);
       const look = C.looks[i];
       if (!look) return;
-      img.parentElement.classList.remove("look__art--photo");
+      const art = img.parentElement;
+      art.classList.remove("look__art--photo");
+      art.querySelector(".look__credit")?.remove();
       img.outerHTML = window.renderHead(look, "look" + i);
     }, true);
     track.addEventListener("click", (e) => {
@@ -1101,7 +1054,6 @@
   function renderAll() {
     $$(".js-cur").forEach((el) => (el.textContent = " " + C.currency));
     renderStatus();
-    renderHint();
     splitManifesto();
     renderLabControls();
     updateLab(false);
