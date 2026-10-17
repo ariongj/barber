@@ -36,6 +36,11 @@ Empty fields are hidden automatically. Page text lives in `index.html` (Albanian
 
 > The prices, durations and opening hours currently in `config.js` are **placeholders**. Replace them with the studio's real ones before going live.
 
+## Photo credits
+
+The Fade Lab currently uses free stock photos as illustrative examples of each style, credited on the page:
+[tWzR3llIMsY](https://unsplash.com/photos/tWzR3llIMsY), [z0Cyh9nGLFY](https://unsplash.com/photos/z0Cyh9nGLFY), [John Arano](https://unsplash.com/photos/CCTCHXEsan8), [Hair Spies](https://hairspies.com/) ([1](https://unsplash.com/photos/jzGDfI9GMS0), [2](https://unsplash.com/photos/FtYpeIRDzaw)) and [Arthur Humeau](https://unsplash.com/photos/Twd3yaqA2NM) on Unsplash (Unsplash License), and [Truth678 on Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Fade_Hair_Cut.jpg) (CC BY-SA 4.0). Swap them for the studio's own work in `js/config.js` → `lab.photos`.
+
 ## Files
 
 ```

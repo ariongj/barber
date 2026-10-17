@@ -72,12 +72,25 @@ window.PRIVE = {
       { id: "short",   price: 4, min: 20, sq: "E shkurtër",  en: "Short" },
       { id: "full",    price: 5, min: 25, sq: "E plotë",     en: "Full" }
     ],
-    // Real photos (optional). Put the files in assets/img/lab/ and fill in the paths.
-    // When the chosen fade has a photo, the Fade Lab shows it, with the drawing
-    // of the exact combination as a small card. Without a photo it shows the drawing.
+    // Real photos. When the chosen fade has a photo, the Fade Lab shows it, with the
+    // drawing of the exact combination as a small card. Without a photo it shows the drawing.
+    // Each entry is a path/URL, or { src, credit, href } to show a photo credit.
+    // These are free stock photos (Unsplash License, and one CC BY-SA 4.0 photo from
+    // Wikimedia Commons). Replace them with the studio's own work in assets/img/lab/.
     photos: {
-      fades:  { none: "", taper: "", low: "", mid: "", high: "", skin: "" },
-      beards: { stubble: "", short: "", full: "" }
+      fades: {
+        none:  { src: "https://unsplash.com/photos/tWzR3llIMsY/download?w=1200", credit: "Unsplash", href: "https://unsplash.com/photos/tWzR3llIMsY" },
+        taper: { src: "https://unsplash.com/photos/z0Cyh9nGLFY/download?w=1200", credit: "Unsplash", href: "https://unsplash.com/photos/z0Cyh9nGLFY" },
+        low:   { src: "https://unsplash.com/photos/CCTCHXEsan8/download?w=1200", credit: "John Arano / Unsplash", href: "https://unsplash.com/photos/CCTCHXEsan8" },
+        mid:   { src: "https://unsplash.com/photos/jzGDfI9GMS0/download?w=1200", credit: "Hair Spies / Unsplash", href: "https://unsplash.com/photos/jzGDfI9GMS0" },
+        high:  { src: "https://unsplash.com/photos/FtYpeIRDzaw/download?w=1200", credit: "Hair Spies / Unsplash", href: "https://unsplash.com/photos/FtYpeIRDzaw" },
+        skin:  { src: "https://commons.wikimedia.org/wiki/Special:FilePath/Fade_Hair_Cut.jpg?width=1100", credit: "Truth678 / Wikimedia Commons, CC BY-SA 4.0", href: "https://commons.wikimedia.org/wiki/File:Fade_Hair_Cut.jpg" }
+      },
+      beards: {
+        stubble: "",
+        short: "",
+        full:  { src: "https://unsplash.com/photos/Twd3yaqA2NM/download?w=1200", credit: "Arthur Humeau / Unsplash", href: "https://unsplash.com/photos/Twd3yaqA2NM" }
+      }
     },
     extras: [
       { id: "lineup", price: 2, min: 10, sq: "Konturim me brisk", en: "Razor line-up" },

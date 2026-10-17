@@ -318,8 +318,13 @@
   let svcTimer;
 
   /* ---------- Fade Lab photos ---------- */
-  const labPhotos = (C.lab.photos && C.lab.photos.fades) || {};
-  const beardPhotos = (C.lab.photos && C.lab.photos.beards) || {};
+  // photo entries are a path/URL or { src, credit, href }
+  const photoOf = (v) => (typeof v === "string" ? { src: v } : v || {});
+  const mapPhotos = (o) => Object.fromEntries(Object.entries(o || {}).map(([k, v]) => [k, photoOf(v)]));
+  const labPhotoInfo = mapPhotos(C.lab.photos && C.lab.photos.fades);
+  const beardPhotoInfo = mapPhotos(C.lab.photos && C.lab.photos.beards);
+  const labPhotos = Object.fromEntries(Object.entries(labPhotoInfo).map(([k, v]) => [k, v.src || ""]));
+  const beardPhotos = Object.fromEntries(Object.entries(beardPhotoInfo).map(([k, v]) => [k, v.src || ""]));
   const brokenPhotos = new Set();
   const usable = (src) => !!src && !brokenPhotos.has(src);
   const hasLabPhotos = () => Object.values(labPhotos).some(usable);
@@ -365,6 +370,11 @@
       showPhoto(fadeSrc);
       const fade = L.fades.find((f) => f.id === lab.fade);
       $("b", cap).textContent = local(fade);
+      const info = labPhotoInfo[lab.fade] || {};
+      const credit = $("#labCredit");
+      credit.hidden = !info.credit;
+      credit.textContent = info.credit ? "· " + info.credit : "";
+      if (info.href) credit.href = info.href; else credit.removeAttribute("href");
     }
 
     const beardSrc = beardPhotos[lab.beard];

@@ -39,7 +39,7 @@ window.I18N = {
     "lab.view": "View",
     "lab.photo": "Photo",
     "lab.draw": "Illustration",
-    "lab.ref": "Reference photo",
+    "lab.ref": "Illustrative photo",
     "looks.kicker": "Styles",
     "looks.title": "Find <em>your style</em>",
     "prev": "Previous",
