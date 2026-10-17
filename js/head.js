@@ -32,6 +32,13 @@
     const [hairEnd, skinStart] = FADES[s.fade] || FADES.mid;
     const sideAlpha = s.top < 8 && s.fade === "none" ? 0.62 : 0.97;
     const id = (n) => `${n}-${uid}`;
+    // optional guide line showing where the fade starts (used by "Fade 101")
+    const my = 96 + ((hairEnd + skinStart) / 2) * 160;
+    const marker = s.marker
+      ? `<g stroke="${RED}" stroke-width="3" stroke-dasharray="6 5" stroke-linecap="round">
+          <path d="M84 ${my} H140"/><path d="M260 ${my} H316"/>
+        </g><circle cx="84" cy="${my}" r="5" fill="${RED}"/><circle cx="316" cy="${my}" r="5" fill="${RED}"/>`
+      : "";
 
     const top = `M112 184
       C105 ${128 - H * 0.6} 146 ${84 - H} 200 ${82 - H}
@@ -125,6 +132,7 @@
   </g>
 
   <path d="${top}" fill="${HAIR}"/>
+  ${marker}
   <g clip-path="url(#${id("top")})" stroke="${HAIR_LIGHT}" stroke-width="2.6" fill="none" stroke-linecap="round" opacity=".7">${strands}</g>
   ${part}
   ${lineup}

@@ -40,7 +40,9 @@ window.I18N = {
     "lab.draw": "Illustration",
     "lab.ref": "Illustrative photo",
     "looks.kicker": "Styles",
-    "looks.title": "Find <em>your style</em>",
+    "looks.title": "The style <em>catalogue</em>",
+    "looks.lead": "Learn the difference between fades, tapers and the classics. When one catches your eye, try it in the Fade Lab.",
+    "looks.groups": "Style groups",
     "prev": "Previous",
     "next": "Next",
     "menu.kicker": "Prices",
@@ -112,6 +114,11 @@ window.I18N = {
       dialClosed: "Mbyllur",
       now: "Tani",
       lookCta: "Shiko më shumë punë në Instagram",
+      upkeep: "Rifreskim çdo {n} javë",
+      upkeep1: "Rifreskim çdo javë",
+      f101Title: "Fade 101",
+      f101Lead: "Emri i fade-it tregon ku fillon kalimi. Sa më lart, aq më i fortë kontrasti.",
+      f101: { low: "Fillon mbi vesh", mid: "Fillon te tëmthat", high: "Fillon afër majës", skin: "Deri në lëkurë" },
       added: "Prerja u shtua te rezervimi"
     },
     en: {
@@ -153,6 +160,11 @@ window.I18N = {
       dialClosed: "Closed",
       now: "Now",
       lookCta: "See more work on Instagram",
+      upkeep: "Touch-up every {n} weeks",
+      upkeep1: "Touch-up every week",
+      f101Title: "Fade 101",
+      f101Lead: "A fade's name tells you where the blend starts. The higher it starts, the stronger the contrast.",
+      f101: { low: "Starts above the ear", mid: "Starts at the temples", high: "Starts near the crown", skin: "Goes down to the skin" },
       added: "Cut added to your booking"
     }
   }

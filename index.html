@@ -65,12 +65,12 @@
   </header>
 
   <main>
-    <!-- Hero: the hair drops away to reveal the barber-pole colours -->
+    <!-- Hero: a black curtain lifts to reveal the barber-pole colours -->
     <section class="hero" id="top" aria-labelledby="heroTitle">
       <div class="hero__skin" aria-hidden="true">
         <div class="hero__word">PRIVÉ</div>
       </div>
-      <canvas class="hero__hair" id="hair" aria-hidden="true"></canvas>
+      <div class="hero__curtain" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
 
       <div class="hero__ui">
         <p class="hero__eyebrow diff"><span>Hair Studio</span><span class="hero__dot"></span><span class="js-city">Kosovë</span><span class="hero__dot"></span><span data-i18n="hero.appt">Vetëm me termin</span></p>
@@ -191,22 +191,26 @@
       </div>
     </section>
 
-    <!-- Lookbook -->
+    <!-- Style catalogue -->
     <section class="looks" id="lookbook" aria-labelledby="looksTitle">
       <div class="container">
         <div class="section-head section-head--row">
           <div>
             <p class="kicker reveal"><span class="kicker__n">02</span><span data-i18n="looks.kicker">Stilet</span></p>
-            <h2 id="looksTitle" class="h2 reveal" data-i18n-html="looks.title">Gjej <em>stilin tënd</em></h2>
+            <h2 id="looksTitle" class="h2 reveal" data-i18n-html="looks.title">Katalogu i <em>stileve</em></h2>
+            <p class="section-head__lead reveal" data-i18n="looks.lead">Mëso dallimin mes fade-ve, taper-ave dhe prerjeve klasike. Kur të pëlqen një, provoje në Fade Lab.</p>
           </div>
           <div class="looks__nav reveal">
             <button type="button" class="round" id="looksPrev" data-i18n-attr="aria-label:prev" aria-label="Para"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></button>
             <button type="button" class="round" id="looksNext" data-i18n-attr="aria-label:next" aria-label="Pas"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
           </div>
         </div>
+        <div class="looks__filters reveal" id="looksFilters" role="group" data-i18n-attr="aria-label:looks.groups" aria-label="Grupet e stileve"></div>
       </div>
-      <div class="looks__track" id="looksTrack" tabindex="0" aria-label="Lookbook"></div>
+      <div class="looks__track" id="looksTrack" tabindex="0" data-i18n-attr="aria-label:looks.kicker" aria-label="Stilet"></div>
       <div class="container">
+        <div class="looks__progress" aria-hidden="true"><span id="looksBar"></span></div>
+        <div class="fade101 reveal" id="fade101"></div>
         <div class="photos" id="photos" hidden></div>
       </div>
     </section>
@@ -356,7 +360,6 @@
   <script src="js/config.js"></script>
   <script src="js/i18n.js"></script>
   <script src="js/head.js"></script>
-  <script src="js/hair.js"></script>
   <script src="js/main.js"></script>
 </body>
 </html>

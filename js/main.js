@@ -122,24 +122,24 @@
   }
 
   /* ======================================================================
-     Hero: the hair drops away to reveal the barber-pole colours
+     Hero: a black curtain lifts to reveal the barber-pole colours
      ====================================================================== */
   const hero = $(".hero");
-  let hair = null;
+  let curtain = true;
 
-  function reveal() {
-    hero.classList.add("is-shaved");
+  function openHero() {
+    hero.classList.add("is-open");
+    // drop the curtain panels from the page once they have lifted
+    setTimeout(() => $(".hero__curtain")?.remove(), 1600);
   }
 
   function setupHero() {
-    const canvas = $("#hair");
     // skip the curtain when motion is reduced, or when the page opens scrolled past the hero
-    if (reduceMotion || !canvas.getContext || !window.HairCurtain || scrollY > innerHeight * 0.5) {
-      document.body.classList.add("no-hair");
-      reveal();
-      return;
+    if (reduceMotion || scrollY > innerHeight * 0.5) {
+      curtain = false;
+      hero.classList.add("is-open", "is-instant");
+      $(".hero__curtain")?.remove();
     }
-    hair = new window.HairCurtain(hero, canvas);
   }
 
   /* ======================================================================
@@ -155,10 +155,7 @@
         loader.classList.add("is-done");
         document.body.classList.remove("is-loading");
         setTimeout(() => loader.remove(), 800);
-        if (hair) setTimeout(() => {
-          hero.classList.add("is-dropping");
-          hair.drop(() => { reveal(); document.body.classList.add("no-hair"); });
-        }, 1100);
+        if (curtain) setTimeout(openHero, 650);
       }, reduceMotion ? 0 : wait);
     });
   }
@@ -448,24 +445,49 @@
   /* ======================================================================
      Lookbook
      ====================================================================== */
-  function renderLooks() {
-    const track = $("#looksTrack");
-    track.innerHTML = C.looks.map((l, i) => {
-      const q = quote({ ...l, extras: l.extras });
-      const ph = photoOf(l.photo);
-      return `<article class="look look--${(i % 6) + 1}">
-        <div class="look__art${ph.src ? " look__art--photo" : ""}"><span class="look__n">0${i + 1}</span>${ph.src
-          ? `<img src="${esc(ph.src)}" alt="${esc(local(l))}" loading="lazy" decoding="async" />${ph.credit ? `<a class="look__credit" href="${esc(ph.href || ph.src)}" target="_blank" rel="noopener">${esc(ph.credit)}</a>` : ""}`
-          : window.renderHead(l, "look" + i)}</div>
+  let lookGroup = "all";
+  const lookById = (id) => C.looks.find((l) => l.id === id);
+  const visibleLooks = () => C.looks.filter((l) => lookGroup === "all" || l.group === lookGroup);
+
+  function renderLookFilters() {
+    const groups = [["all", t("all"), C.looks.length], ...Object.entries(C.lookGroups || {}).map(([k, v]) =>
+      [k, local(v), C.looks.filter((l) => l.group === k).length])].filter((g) => g[2]);
+    $("#looksFilters").innerHTML = groups.map(([k, label, n]) =>
+      `<button type="button" class="pill" data-group="${k}" aria-pressed="${k === lookGroup}">${esc(label)}<small>${n}</small></button>`).join("");
+  }
+
+  function lookCard(l, i) {
+    const q = quote({ ...l, extras: l.extras });
+    const ph = photoOf(l.photo);
+    const group = C.lookGroups && C.lookGroups[l.group];
+    const upkeep = l.weeks ? (l.weeks === 1 ? t("upkeep1") : fill(t("upkeep"), { n: l.weeks })) : "";
+    return `<article class="look look--${(i % 6) + 1}" data-id="${esc(l.id)}">
+        <div class="look__art${ph.src ? " look__art--photo" : ""}">
+          <span class="look__n">${String(C.looks.indexOf(l) + 1).padStart(2, "0")}</span>
+          ${group ? `<span class="look__group">${esc(local(group))}</span>` : ""}
+          ${ph.src
+            ? `<img src="${esc(ph.src)}" alt="${esc(local(l))}" loading="lazy" decoding="async" />${ph.credit ? `<a class="look__credit" href="${esc(ph.href || ph.src)}" target="_blank" rel="noopener">${esc(ph.credit)}</a>` : ""}`
+            : window.renderHead(l, "look-" + l.id)}
+        </div>
         <div class="look__body">
           <h3 class="look__name">${esc(local(l))}</h3>
+          ${l.d ? `<p class="look__desc">${esc(local(l.d))}</p>` : ""}
+          ${upkeep ? `<p class="look__upkeep"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>${esc(upkeep)}</p>` : ""}
           <div class="look__meta"><span>${q.min} ${t("min")}</span><b>${price(q.price)}</b></div>
-          <button type="button" class="look__try" data-look="${l.id}">${esc(t("tryIt"))}${ICON.arrow}</button>
+          <button type="button" class="look__try" data-look="${esc(l.id)}">${esc(t("tryIt"))}${ICON.arrow}</button>
         </div>
       </article>`;
-    }).join("") + `<a class="look look--ig" href="${igUrl}" target="_blank" rel="noopener">
+  }
+
+  function renderLooks() {
+    renderLookFilters();
+    const track = $("#looksTrack");
+    track.innerHTML = visibleLooks().map(lookCard).join("") +
+      `<a class="look look--ig" href="${igUrl}" target="_blank" rel="noopener">
         ${ICON.ig}<span>${esc(t("lookCta"))}</span><b>@${esc(C.instagram)} ↗</b>
       </a>`;
+    track.scrollLeft = 0;
+    renderFade101();
 
     const photos = $("#photos");
     if (C.photos.gallery.length) {
@@ -475,6 +497,21 @@
     }
   }
 
+  // A small visual guide: the same client with each fade height, so the names make sense.
+  function renderFade101() {
+    const fades = ["low", "mid", "high", "skin"];
+    $("#fade101").innerHTML = `
+      <div class="fade101__head"><h3>${esc(t("f101Title"))}</h3><p>${esc(t("f101Lead"))}</p></div>
+      <div class="fade101__row">${fades.map((f, i) => {
+        const name = local(L.fades.find((x) => x.id === f));
+        return `<button type="button" class="fade101__item" data-fade101="${f}">
+          <span class="fade101__art">${window.renderHead({ fade: f, top: 30, beard: "none", extras: [], marker: true }, "f101-" + f)}</span>
+          <span class="fade101__n">0${i + 1}</span>
+          <b>${esc(name)}</b><small>${esc(t("f101")[f])}</small>
+        </button>`;
+      }).join("")}</div>`;
+  }
+
   function setupLookTrack() {
     const track = $("#looksTrack");
     // a look photo that fails to load falls back to its drawing
@@ -482,31 +519,55 @@
       const img = e.target;
       if (img.tagName !== "IMG") return;
       const card = img.closest(".look");
-      const i = $$(".look", track).indexOf(card);
-      const look = C.looks[i];
+      const look = card && lookById(card.dataset.id);
       if (!look) return;
       const art = img.parentElement;
       art.classList.remove("look__art--photo");
       art.querySelector(".look__credit")?.remove();
-      img.outerHTML = window.renderHead(look, "look" + i);
+      img.outerHTML = window.renderHead(look, "look-" + look.id);
     }, true);
     track.addEventListener("click", (e) => {
       const b = e.target.closest("[data-look]");
       if (b) loadLook(b.dataset.look);
     });
-    const step = () => ($(".look", track)?.getBoundingClientRect().width || 300) + 18;
-    $("#looksPrev").addEventListener("click", () => track.scrollBy({ left: -step(), behavior: smooth }));
-    $("#looksNext").addEventListener("click", () => track.scrollBy({ left: step(), behavior: smooth }));
-    const syncNav = () => {
-      $("#looksPrev").disabled = track.scrollLeft < 8;
-      $("#looksNext").disabled = track.scrollLeft + track.clientWidth >= track.scrollWidth - 8;
+    $("#looksFilters").addEventListener("click", (e) => {
+      const b = e.target.closest("[data-group]");
+      if (!b || b.dataset.group === lookGroup) return;
+      lookGroup = b.dataset.group;
+      renderLooks();
+      syncNav();
+      restartAuto();
+    });
+    $("#fade101").addEventListener("click", (e) => {
+      const b = e.target.closest("[data-fade101]");
+      if (!b) return;
+      Object.assign(lab, { fade: b.dataset.fade101, top: 30, beard: "none", extras: new Set() });
+      touchLab();
+      renderLabControls();
+      updateLab(true);
+      $("#lab").scrollIntoView({ behavior: smooth });
+    });
+
+    const gap = 18;
+    const step = () => ($(".look", track)?.getBoundingClientRect().width || 300) + gap;
+    const atEnd = () => track.scrollLeft + track.clientWidth >= track.scrollWidth - 8;
+    const next = () => {
+      if (atEnd()) track.scrollTo({ left: 0, behavior: smooth });
+      else track.scrollBy({ left: step(), behavior: smooth });
     };
+    $("#looksPrev").addEventListener("click", () => { track.scrollBy({ left: -step(), behavior: smooth }); pauseAuto(); });
+    $("#looksNext").addEventListener("click", () => { next(); pauseAuto(); });
+    function syncNav() {
+      $("#looksPrev").disabled = track.scrollLeft < 8;
+      $("#looksNext").disabled = false;
+    }
     track.addEventListener("scroll", syncNav, { passive: true });
     syncNav();
 
     // drag to scroll with a mouse
     let drag = null;
     track.addEventListener("pointerdown", (e) => {
+      pauseAuto();
       if (e.pointerType !== "mouse" || e.button !== 0) return;
       drag = { x: e.clientX, left: track.scrollLeft, moved: false };
     });
@@ -522,6 +583,36 @@
       drag = null;
       if (moved) setTimeout(() => track.classList.remove("is-drag"), 0);
     });
+
+    /* ---------- autoplay: slides one card every few seconds ---------- */
+    const DELAY = 3600;
+    const bar = $("#looksBar");
+    let timer = 0, inView = false, hover = false, pausedUntil = 0;
+    const canPlay = () => !reduceMotion && inView && !hover && !document.hidden && Date.now() >= pausedUntil;
+    function tick() {
+      clearTimeout(timer);
+      bar.classList.remove("is-run");
+      if (!canPlay()) {
+        if (Date.now() < pausedUntil) timer = setTimeout(tick, pausedUntil - Date.now() + 50);
+        return;
+      }
+      void bar.offsetWidth;
+      bar.style.animationDuration = DELAY + "ms";
+      bar.classList.add("is-run");
+      timer = setTimeout(() => { if (canPlay()) next(); tick(); }, DELAY);
+    }
+    function pauseAuto() { pausedUntil = Date.now() + 7000; tick(); }
+    function restartAuto() { pausedUntil = 0; tick(); }
+    track.addEventListener("mouseenter", () => { hover = true; tick(); });
+    track.addEventListener("mouseleave", () => { hover = false; tick(); });
+    track.addEventListener("focusin", () => { hover = true; tick(); });
+    track.addEventListener("focusout", () => { hover = false; tick(); });
+    track.addEventListener("touchstart", pauseAuto, { passive: true });
+    track.addEventListener("wheel", (e) => { if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) pauseAuto(); }, { passive: true });
+    document.addEventListener("visibilitychange", tick);
+    if ("IntersectionObserver" in window) {
+      new IntersectionObserver(([e]) => { inView = e.isIntersecting; tick(); }, { threshold: 0.35 }).observe(track);
+    }
   }
 
   /* ======================================================================
