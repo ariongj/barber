@@ -28,7 +28,8 @@ Everything about the shop is in **`js/config.js`**:
 | `hours` | Opening hours per day (`null` = closed). Drives the open badge, the dial and the booking slots |
 | `services` | The price list: name (sq/en), description, price in €, minutes. `featured: true` adds a "Signature" tag |
 | `lab` | Fade Lab prices and times: base price per fade, scissor extra for long tops, beard styles, extras |
-| `looks` | The lookbook cards and the settings each one loads into the Fade Lab |
+| `lab.photos` | Real photos per fade and beard style (files in `assets/img/lab/`). When the chosen fade has one, the Fade Lab shows the photo, with a small drawing of the exact combination; otherwise it shows the drawing. Visitors can switch between Photo and Illustration |
+| `looks` | The lookbook cards and the settings each one loads into the Fade Lab. Add `photo` to a look to show a real photo on its card |
 | `photos.gallery` | Put photos in `assets/img/` and list them. They appear under the lookbook |
 
 Empty fields are hidden automatically. Page text lives in `index.html` (Albanian) and `js/i18n.js` (English).

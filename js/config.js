@@ -72,6 +72,13 @@ window.PRIVE = {
       { id: "short",   price: 4, min: 20, sq: "E shkurtër",  en: "Short" },
       { id: "full",    price: 5, min: 25, sq: "E plotë",     en: "Full" }
     ],
+    // Real photos (optional). Put the files in assets/img/lab/ and fill in the paths.
+    // When the chosen fade has a photo, the Fade Lab shows it, with the drawing
+    // of the exact combination as a small card. Without a photo it shows the drawing.
+    photos: {
+      fades:  { none: "", taper: "", low: "", mid: "", high: "", skin: "" },
+      beards: { stubble: "", short: "", full: "" }
+    },
     extras: [
       { id: "lineup", price: 2, min: 10, sq: "Konturim me brisk", en: "Razor line-up" },
       { id: "part",   price: 2, min: 10, sq: "Vijë anësore",      en: "Hard part" },
@@ -81,6 +88,7 @@ window.PRIVE = {
   },
 
   // Lookbook: ready-made looks shown as cards; "Try it" loads them into the Fade Lab.
+  // Add `photo: "assets/img/looks/name.jpg"` to a look to show a real photo instead of the drawing.
   looks: [
     { id: "low",   fade: "low",   top: 30, beard: "none",    extras: [],                 sq: "Low fade",       en: "Low fade" },
     { id: "skin",  fade: "skin",  top: 18, beard: "stubble", extras: ["lineup"],         sq: "Skin fade",      en: "Skin fade" },

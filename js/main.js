@@ -295,6 +295,7 @@
       headEl.classList.add("is-swap");
     }
     $("#labTag").textContent = labSummary();
+    updateLabPhoto();
     $("#labTopOut").textContent = lab.top + " mm";
     const range = $("#labTop");
     range.value = lab.top;
@@ -315,6 +316,96 @@
     }
   }
   let svcTimer;
+
+  /* ---------- Fade Lab photos ---------- */
+  const labPhotos = (C.lab.photos && C.lab.photos.fades) || {};
+  const beardPhotos = (C.lab.photos && C.lab.photos.beards) || {};
+  const brokenPhotos = new Set();
+  const usable = (src) => !!src && !brokenPhotos.has(src);
+  const hasLabPhotos = () => Object.values(labPhotos).some(usable);
+  let labView = store.get("labView") === "draw" ? "draw" : "photo";
+  const photoImgs = $$("#labPhotos img");
+  let photoActive = 0, photoSrc = "";
+
+  function showPhoto(src) {
+    if (src === photoSrc) return;
+    photoSrc = src;
+    const next = photoImgs[1 - photoActive];
+    let done = false;
+    const swap = () => {
+      if (done || photoSrc !== src) return;
+      done = true;
+      next.classList.add("is-on");
+      photoImgs[photoActive].classList.remove("is-on");
+      photoActive = 1 - photoActive;
+    };
+    next.onload = swap;
+    next.onerror = () => {
+      brokenPhotos.add(src);
+      photoSrc = "";
+      updateLabPhoto();
+    };
+    next.src = src;
+    if (next.complete && next.naturalWidth) swap();
+  }
+
+  function updateLabPhoto() {
+    const stage = $("#labStage");
+    const fadeSrc = labPhotos[lab.fade];
+    const any = hasLabPhotos();
+    const on = any && labView === "photo" && usable(fadeSrc);
+    $("#labView").hidden = !any;
+    $$("#labView [data-view]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.view === labView)));
+    stage.classList.toggle("is-photo", on);
+    $("#labHead").dataset.label = on ? t("combo") : "";
+
+    const cap = $("#labCaption");
+    cap.hidden = !on;
+    if (on) {
+      showPhoto(fadeSrc);
+      const fade = L.fades.find((f) => f.id === lab.fade);
+      $("b", cap).textContent = local(fade);
+    }
+
+    const beardSrc = beardPhotos[lab.beard];
+    const pic = $("#labBeardPic");
+    const showBeard = on && lab.beard !== "none" && usable(beardSrc);
+    pic.hidden = !showBeard;
+    if (showBeard) {
+      const img = $("img", pic);
+      if (img.getAttribute("src") !== beardSrc) {
+        img.onerror = () => { brokenPhotos.add(beardSrc); updateLabPhoto(); };
+        img.src = beardSrc;
+      }
+      const beard = L.beards.find((b) => b.id === lab.beard);
+      $("figcaption", pic).textContent = local(beard);
+    }
+  }
+
+  $("#labView").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-view]");
+    if (!b) return;
+    labView = b.dataset.view;
+    store.set("labView", labView);
+    updateLabPhoto();
+  });
+
+  // fetch the lab photos shortly before the section comes into view
+  function preloadLabPhotos() {
+    const all = [...Object.values(labPhotos), ...Object.values(beardPhotos)].filter(Boolean);
+    if (!all.length || !("IntersectionObserver" in window)) return;
+    const io = new IntersectionObserver(([e]) => {
+      if (!e.isIntersecting) return;
+      io.disconnect();
+      all.forEach((src) => {
+        const img = new Image();
+        img.decoding = "async";
+        img.onerror = () => brokenPhotos.add(src);
+        img.src = src;
+      });
+    }, { rootMargin: "600px 0px" });
+    io.observe($("#lab"));
+  }
 
   function touchLab() {
     labTouched = true;
@@ -402,7 +493,9 @@
     track.innerHTML = C.looks.map((l, i) => {
       const q = quote({ ...l, extras: l.extras });
       return `<article class="look look--${(i % 6) + 1}">
-        <div class="look__art"><span class="look__n">0${i + 1}</span>${window.renderHead(l, "look" + i)}</div>
+        <div class="look__art${l.photo ? " look__art--photo" : ""}"><span class="look__n">0${i + 1}</span>${l.photo
+          ? `<img src="${esc(l.photo)}" alt="${esc(local(l))}" loading="lazy" decoding="async" />`
+          : window.renderHead(l, "look" + i)}</div>
         <div class="look__body">
           <h3 class="look__name">${esc(local(l))}</h3>
           <div class="look__meta"><span>${q.min} ${t("min")}</span><b>${price(q.price)}</b></div>
@@ -423,6 +516,17 @@
 
   function setupLookTrack() {
     const track = $("#looksTrack");
+    // a look photo that fails to load falls back to its drawing
+    track.addEventListener("error", (e) => {
+      const img = e.target;
+      if (img.tagName !== "IMG") return;
+      const card = img.closest(".look");
+      const i = $$(".look", track).indexOf(card);
+      const look = C.looks[i];
+      if (!look) return;
+      img.parentElement.classList.remove("look__art--photo");
+      img.outerHTML = window.renderHead(look, "look" + i);
+    }, true);
     track.addEventListener("click", (e) => {
       const b = e.target.closest("[data-look]");
       if (b) loadLook(b.dataset.look);
@@ -1017,6 +1121,7 @@
 
   setupHero();
   setupLookTrack();
+  preloadLabPhotos();
   setupPointerFx();
   renderMap();
   applyLang(lang);

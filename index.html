@@ -156,12 +156,19 @@
         </div>
 
         <div class="lab__grid">
-          <div class="lab__stage reveal">
+          <div class="lab__stage reveal" id="labStage">
+            <div class="lab__photos" id="labPhotos" aria-hidden="true"><img alt="" decoding="async" /><img alt="" decoding="async" /></div>
             <div class="lab__mirror" aria-hidden="true">
               <svg viewBox="0 0 200 200"><defs><path id="mirrorPath" d="M100,100 m-90,0 a90,90 0 1,1 180,0 a90,90 0 1,1 -180,0"/></defs><text><textPath href="#mirrorPath">FADE LAB ✦ PRIVÉ HAIR STUDIO ✦ FADE LAB ✦ PRIVÉ HAIR STUDIO ✦</textPath></text></svg>
             </div>
             <div class="lab__head" id="labHead"></div>
             <div class="lab__tag" id="labTag" aria-live="polite"></div>
+            <div class="lab__view" id="labView" role="group" data-i18n-attr="aria-label:lab.view" aria-label="Pamja" hidden>
+              <button type="button" data-view="photo" aria-pressed="true" data-i18n="lab.photo">Foto</button>
+              <button type="button" data-view="draw" aria-pressed="false" data-i18n="lab.draw">Ilustrim</button>
+            </div>
+            <figure class="lab__beardpic" id="labBeardPic" hidden><img alt="" decoding="async" /><figcaption></figcaption></figure>
+            <p class="lab__caption" id="labCaption" hidden><b></b><span data-i18n="lab.ref">Foto referuese</span></p>
           </div>
 
           <div class="lab__panel reveal">
