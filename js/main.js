@@ -249,13 +249,7 @@
     shownPrice = q.price;
     $("#labMin").textContent = `${q.min} ${t("min")}`;
 
-    if (book.service === "lab") { renderSlots(); renderTicket(); }
-    if (labTouched) {
-      clearTimeout(svcTimer);
-      svcTimer = setTimeout(renderSvc, 150);
-    }
   }
-  let svcTimer;
 
   /* ---------- Fade Lab photos ---------- */
   // photo entries are a path/URL or { src, credit, href }
@@ -414,15 +408,7 @@
     renderLabControls();
     updateLab(true);
   });
-  $("#labBook").addEventListener("click", () => {
-    touchLab();
-    book.service = "lab";
-    renderSvc();
-    renderSlots();
-    renderTicket();
-    $("#book").scrollIntoView({ behavior: smooth });
-    toast(t("added"));
-  });
+  $("#labBook").addEventListener("click", () => goBook(labBookUrl(lab)));
 
   function loadLook(id) {
     const look = C.looks.find((l) => l.id === id);
@@ -626,18 +612,7 @@
         return loadLook(id);
       }
       if (e.target.closest("[data-sheet-book]")) {
-        const look = lookById(sheetId);
-        closeSheet();
-        Object.assign(lab, { fade: look.fade, top: look.top, beard: look.beard, extras: new Set(look.extras) });
-        touchLab();
-        renderLabControls();
-        updateLab(true);
-        book.service = "lab";
-        renderSvc();
-        renderSlots();
-        renderTicket();
-        $("#book").scrollIntoView({ behavior: smooth });
-        toast(t("added"));
+        goBook(bookUrl({ look: sheetId }));
       }
     });
     document.addEventListener("keydown", (e) => {
@@ -848,233 +823,16 @@
     $(`#menuTabs [data-cat="${menuCat}"]`).focus();
   });
   $("#menuList").addEventListener("click", (e) => {
-    const row = e.target.closest(".row");
-    if (!row) return;
-    const b = $("[data-book]", row);
-    book.service = b.dataset.book;
-    renderSvc();
-    renderSlots();
-    renderTicket();
-    $("#book").scrollIntoView({ behavior: smooth });
+    const b = e.target.closest(".row") && $("[data-book]", e.target.closest(".row"));
+    if (b) goBook(bookUrl({ s: b.dataset.book }));
   });
 
   /* ======================================================================
-     Booking
+     Booking happens on book.html; these build the links that carry the choice
      ====================================================================== */
-  const book = { service: null, date: null, time: null };
-  const form = $("#bookForm");
-
-  function selectedService() {
-    if (book.service === "lab") {
-      const q = quote(lab);
-      return { id: "lab", name: `${t("labCut")} (${labSummary()})`, price: q.price, min: q.min };
-    }
-    const s = C.services.find((x) => x.id === book.service);
-    return s ? { id: s.id, name: local(s), price: s.price, min: s.min } : null;
-  }
-
-  function renderSvc() {
-    const list = [];
-    if (labTouched || book.service === "lab") {
-      const q = quote(lab);
-      list.push(`<label><input type="radio" name="svc" value="lab"${book.service === "lab" ? " checked" : ""} />
-        <span class="svc__card svc__card--lab"><small>Fade Lab</small><span class="svc__name">${esc(labSummary())}</span>
-        <span class="svc__meta"><span>${q.min} ${t("min")}</span><b>${price(q.price)}</b></span></span></label>`);
-    }
-    C.services.forEach((s) => {
-      list.push(`<label><input type="radio" name="svc" value="${s.id}"${book.service === s.id ? " checked" : ""} />
-        <span class="svc__card"><span class="svc__name">${esc(local(s))}</span>
-        <span class="svc__meta"><span>${s.min} ${t("min")}</span><b>${price(s.price)}</b></span></span></label>`);
-    });
-    $("#svcList").innerHTML = list.join("");
-    markSteps();
-  }
-  $("#svcList").addEventListener("change", (e) => {
-    book.service = e.target.value;
-    renderSlots();
-    renderTicket();
-  });
-
-  function slotsFor(ymd) {
-    const h = hoursFor(dowOf(ymd));
-    if (!h) return null;
-    const s = selectedService();
-    const now = shopNow();
-    const earliest = ymd === now.ymd ? now.min + 30 : 0;
-    const out = [];
-    for (let m = h.open; m + (s ? s.min : C.slotMinutes) <= h.close; m += C.slotMinutes) {
-      if (m >= earliest) out.push(m);
-    }
-    return out;
-  }
-
-  function renderDays() {
-    const now = shopNow();
-    const html = [];
-    for (let i = 0; i < C.bookingDaysAhead; i++) {
-      const ymd = addDays(now.ymd, i);
-      const slots = slotsFor(ymd);
-      const off = !slots || !slots.length;
-      const [, m, d] = ymd.split("-").map(Number);
-      const top = i === 0 ? t("today") : i === 1 ? t("tomorrow") : t("daysShort")[dowOf(ymd)];
-      html.push(`<button type="button" class="day" data-date="${ymd}" aria-pressed="${book.date === ymd}"${off ? " disabled" : ""} aria-label="${esc(fmtDate(ymd))}">
-        <small>${esc(top)}</small><b>${d}</b><small>${esc(t("months")[m - 1])}</small></button>`);
-    }
-    $("#dayRow").innerHTML = html.join("");
-  }
-  $("#dayRow").addEventListener("click", (e) => {
-    const b = e.target.closest("[data-date]");
-    if (!b || b.disabled) return;
-    book.date = b.dataset.date;
-    $$("#dayRow .day").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
-    renderSlots();
-    renderTicket();
-  });
-
-  function renderSlots() {
-    const grid = $("#slotGrid");
-    if (!book.date) {
-      grid.innerHTML = `<p class="slots__empty">${esc(t("pickDay"))}</p>`;
-      markSteps();
-      return;
-    }
-    const slots = slotsFor(book.date) || [];
-    if (book.time && !slots.includes(toMin(book.time))) book.time = null;
-    grid.innerHTML = slots.length
-      ? slots.map((m) => `<button type="button" class="slot" data-time="${fmtMin(m)}" aria-pressed="${book.time === fmtMin(m)}">${fmtMin(m)}</button>`).join("")
-      : `<p class="slots__empty">${esc(t("noSlots"))}</p>`;
-    markSteps();
-  }
-  $("#slotGrid").addEventListener("click", (e) => {
-    const b = e.target.closest("[data-time]");
-    if (!b) return;
-    book.time = b.dataset.time;
-    $$("#slotGrid .slot").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
-    renderTicket();
-    markSteps();
-  });
-
-  function markSteps() {
-    const steps = $$(".step", form);
-    const done = [!!book.service, !!book.date, !!book.time, !!(form.name.value.trim() && form.phone.value.trim())];
-    steps.forEach((s, i) => s.classList.toggle("is-done", done[i]));
-  }
-
-  function hash(str) {
-    let h = 2166136261;
-    for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); }
-    return h >>> 0;
-  }
-
-  const ticketVals = {};
-  function setTicket(id, val) {
-    const el = $("#" + id);
-    if (ticketVals[id] === val) return;
-    const changed = ticketVals[id] !== undefined;
-    ticketVals[id] = val;
-    el.textContent = val;
-    if (changed && val !== "–") {
-      el.classList.remove("is-set");
-      void el.offsetWidth;
-      el.classList.add("is-set");
-    }
-  }
-
-  function renderTicket() {
-    const s = selectedService();
-    setTicket("tService", s ? s.name : "–");
-    setTicket("tDay", book.date ? fmtDate(book.date) : "–");
-    setTicket("tTime", book.time || "–");
-    setTicket("tLength", s ? `${s.min} ${t("min")}` : "–");
-    setTicket("tName", form.name.value.trim() || "–");
-    setTicket("tTotal", s ? price(s.price) : "–");
-
-    const h = hash([book.service, book.date, book.time, form.name.value.trim()].join("|"));
-    $("#tNo").textContent = String(h % 10000).padStart(4, "0");
-    let x = 0, bars = "", seed = h || 1;
-    while (x < 118) {
-      seed = (Math.imul(seed, 1103515245) + 12345) >>> 0;
-      const w = 1 + (seed % 4);
-      if ((seed >> 5) % 3) bars += `<rect x="${x}" y="0" width="${w}" height="40"/>`;
-      x += w + 1 + ((seed >> 8) % 2);
-    }
-    $("#tCode").innerHTML = bars;
-    markSteps();
-  }
-
-  ["name", "phone"].forEach((k) => {
-    const v = store.get(k);
-    if (v) form[k].value = v;
-  });
-  form.name.addEventListener("input", renderTicket);
-  form.phone.addEventListener("input", markSteps);
-
-  function renderSubmit() {
-    $("#submitLabel").textContent = waNumber ? t("submitWa") : t("submitIg");
-    $("#formFine").textContent = waNumber ? t("fineWa") : t("fineIg");
-    const alt = [];
-    if (C.phone) alt.push(`<a href="${telHref}">${ICON.phone}${esc(t("callUs"))}</a>`);
-    if (waNumber) alt.push(`<a href="https://wa.me/${waNumber}" target="_blank" rel="noopener">${ICON.wa}WhatsApp</a>`);
-    alt.push(`<a href="${igDm}" target="_blank" rel="noopener">${ICON.ig}Instagram</a>`);
-    $("#bookAlt").innerHTML = `<span>${esc(t("orBook"))}:</span>${alt.join("")}`;
-  }
-
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const err = $("#formError");
-    const missing = [];
-    if (!book.service) missing.push("service");
-    if (!book.date) missing.push("date");
-    if (!book.time) missing.push("time");
-    if (!form.name.value.trim()) missing.push("name");
-    if (!form.phone.value.trim()) missing.push("phone");
-    $$(".field", form).forEach((f) => f.classList.remove("is-invalid"));
-    if (missing.length) {
-      err.textContent = fill(t("err"), { f: missing.map((k) => t("fields")[k]).join(", ") });
-      err.hidden = false;
-      if (missing.includes("name")) form.name.closest(".field").classList.add("is-invalid");
-      if (missing.includes("phone")) form.phone.closest(".field").classList.add("is-invalid");
-      const target = { service: "#svcList", date: "#dayRow", time: "#slotGrid", name: "#fName", phone: "#fPhone" }[missing[0]];
-      $(target).closest(".step").scrollIntoView({ behavior: smooth, block: "center" });
-      if (missing[0] === "name" || missing[0] === "phone") $(target).focus({ preventScroll: true });
-      return;
-    }
-    err.hidden = true;
-    store.set("name", form.name.value.trim());
-    store.set("phone", form.phone.value.trim());
-
-    const s = selectedService();
-    const msg = [
-      t("msgHello"),
-      "",
-      `${t("msgService")}: ${s.name} (${price(s.price)}, ${s.min} ${t("min")})`,
-      `${t("msgDate")}: ${fmtDate(book.date)}`,
-      `${t("msgTime")}: ${book.time}`,
-      `${t("msgName")}: ${form.name.value.trim()}`,
-      `${t("msgPhone")}: ${form.phone.value.trim()}`,
-      form.note.value.trim() ? `${t("msgNote")}: ${form.note.value.trim()}` : "",
-      `${t("msgTicket")}: Nr. ${$("#tNo").textContent}`
-    ].filter((l, i) => l || i === 1).join("\n");
-
-    const ticket = $("#ticket");
-    ticket.classList.remove("is-sent");
-    void ticket.offsetWidth;
-    ticket.classList.add("is-sent");
-
-    if (waNumber) {
-      const win = window.open(`https://wa.me/${waNumber}?text=${encodeURIComponent(msg)}`, "_blank");
-      if (win) win.opener = null;
-      else location.href = `https://wa.me/${waNumber}?text=${encodeURIComponent(msg)}`;
-      return;
-    }
-    // Start the copy while this page still has focus, then open Instagram in the same click.
-    let copied;
-    try { copied = navigator.clipboard.writeText(msg); } catch (error) { copied = Promise.reject(error); }
-    const win = window.open(igDm, "_blank");
-    if (win) win.opener = null;
-    try { await copied; toast(t("copied")); } catch { toast(t("copyFail")); }
-    if (!win) setTimeout(() => (location.href = igDm), 1500);
-  });
+  const bookUrl = (q) => "book.html" + (q ? "?" + new URLSearchParams(q).toString() : "");
+  const labBookUrl = (st) => bookUrl({ fade: st.fade, top: st.top, beard: st.beard, x: [...st.extras].join(",") });
+  const goBook = (url) => { location.href = url; };
 
   /* ======================================================================
      Visit: hours dial, contact, map
@@ -1307,10 +1065,7 @@
     new IntersectionObserver(([e]) => { finaleOn = e.isIntersecting; }).observe(finaleWord);
 
     const dock = $("#dock");
-    let heroOut = false, bookIn = false;
-    const sync = () => dock.classList.toggle("is-on", heroOut && !bookIn);
-    new IntersectionObserver(([e]) => { heroOut = !e.isIntersecting; sync(); }, { rootMargin: "-50% 0px 0px 0px" }).observe(hero);
-    new IntersectionObserver(([e]) => { bookIn = e.isIntersecting; sync(); }).observe($("#book"));
+    new IntersectionObserver(([e]) => dock.classList.toggle("is-on", !e.isIntersecting), { rootMargin: "-50% 0px 0px 0px" }).observe(hero);
   }
 
   /* ======================================================================
@@ -1350,11 +1105,6 @@
     updateLab(false);
     renderLooks();
     renderMenu();
-    renderSvc();
-    renderDays();
-    renderSlots();
-    renderTicket();
-    renderSubmit();
     renderDial();
     renderContact();
   }

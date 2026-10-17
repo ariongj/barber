@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="sq">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Rezervo termin · Privé Hair Studio</title>
+  <meta name="description" content="Rezervo terminin te Privé Hair Studio: zgjidh shërbimin, ditën dhe orën. Pa pritje." />
+  <meta name="theme-color" content="#0f0e0d" />
+  <link rel="canonical" href="https://ariongj.github.io/barber/book.html" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Privé Hair Studio" />
+  <meta property="og:title" content="Rezervo termin · Privé Hair Studio" />
+  <meta property="og:description" content="Zgjidh shërbimin, ditën dhe orën. Pa pritje." />
+  <meta property="og:url" content="https://ariongj.github.io/barber/book.html" />
+  <meta property="og:image" content="https://ariongj.github.io/barber/assets/og.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@800;900&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/book.css" />
+</head>
+<body>
+  <header class="top">
+    <a class="top__back" href="index.html" data-i18n-attr="aria-label:bk.back" aria-label="Kthehu te faqja">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+    </a>
+    <a class="top__brand" href="index.html"><i aria-hidden="true"></i>PRIVÉ</a>
+    <div class="lang" role="group" aria-label="Gjuha / Language">
+      <button type="button" data-lang="sq" aria-pressed="true">SQ</button>
+      <button type="button" data-lang="en" aria-pressed="false">EN</button>
+    </div>
+  </header>
+
+  <main class="page" id="page">
+    <div class="intro">
+      <h1 data-i18n="bk.title">Rezervo termin</h1>
+      <p data-i18n="bk.lead">Zgjidh shërbimin, ditën dhe orën. Të konfirmojmë me mesazh.</p>
+    </div>
+
+    <form id="form" novalidate>
+      <section class="step" id="stepService" aria-labelledby="hService">
+        <h2 id="hService"><span class="step__n">1</span><span data-i18n="bk.service">Shërbimi</span></h2>
+        <div class="picked" id="picked" hidden></div>
+        <div class="services" id="services"></div>
+      </section>
+
+      <section class="step" id="stepDay" aria-labelledby="hDay">
+        <h2 id="hDay"><span class="step__n">2</span><span data-i18n="bk.day">Dita</span></h2>
+        <div class="days" id="days"></div>
+      </section>
+
+      <section class="step" id="stepTime" aria-labelledby="hTime">
+        <h2 id="hTime"><span class="step__n">3</span><span data-i18n="bk.time">Ora</span></h2>
+        <div class="slots" id="slots"></div>
+      </section>
+
+      <section class="step" id="stepYou" aria-labelledby="hYou">
+        <h2 id="hYou"><span class="step__n">4</span><span data-i18n="bk.you">Të dhënat</span></h2>
+        <label class="field"><span data-i18n="bk.name">Emri</span>
+          <input id="name" name="name" type="text" autocomplete="name" required data-i18n-attr="placeholder:bk.nameP" placeholder="Emri dhe mbiemri" /></label>
+        <label class="field"><span data-i18n="bk.phone">Telefoni</span>
+          <input id="phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" required placeholder="+383 4x xxx xxx" /></label>
+        <label class="field"><span><span data-i18n="bk.note">Shënim</span> <small data-i18n="bk.optional">(opsionale)</small></span>
+          <textarea id="note" name="note" rows="2" data-i18n-attr="placeholder:bk.noteP" placeholder="P.sh. mos e shkurto shumë sipër"></textarea></label>
+        <p class="fine" id="fine"></p>
+      </section>
+    </form>
+  </main>
+
+  <!-- Sticky summary + send -->
+  <div class="bar" id="bar">
+    <div class="bar__sum">
+      <b id="sumMain">–</b>
+      <span id="sumSub"></span>
+    </div>
+    <button type="submit" form="form" class="send" id="send">
+      <span id="sendLabel">Dërgo</span>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    </button>
+  </div>
+
+  <!-- After sending -->
+  <section class="done" id="done" hidden aria-live="polite">
+    <div class="done__card">
+      <div class="done__stamp" data-i18n="bk.sent">E dërguar</div>
+      <p class="done__no">Nr. <b id="doneNo">0000</b></p>
+      <h2 data-i18n="bk.doneTitle">Kërkesa u dërgua</h2>
+      <p id="doneText"></p>
+      <dl class="done__rows" id="doneRows"></dl>
+      <div class="done__actions">
+        <a class="send send--ghost" id="doneAgain" target="_blank" rel="noopener"></a>
+        <a class="link" href="index.html" data-i18n="bk.home">Kthehu në faqe</a>
+      </div>
+    </div>
+  </section>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+  <script src="js/config.js"></script>
+  <script src="js/i18n.js"></script>
+  <script src="js/book.js"></script>
+</body>
+</html>

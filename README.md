@@ -9,7 +9,7 @@ A fast, single-page site with no build step and no dependencies. It is in **Alba
 - **Black-to-barber-pole reveal.** The page opens on black. A moment after it loads, the black lifts away in panels with a red, white and blue edge, and the striped Privé wordmark rolls in. It goes straight to the striped wordmark for people who ask for reduced motion.
 - **Fade Lab.** Choose fade height, length on top, beard and extras. A real photo of the chosen fade (and beard) fills the stage, switching instantly, while the price and time update live. "Book this cut" puts exactly that cut into the booking form.
 - **Style catalogue.** 18 styles in groups (Fade & taper, Classic, Short, Long, Beard) with filter buttons, running as an endless full-width strip that keeps moving (it slows to a stop on hover, and can be dragged or swiped). Each card opens a guide: what the style is, how to ask your barber for it, who it suits, how to style it, how often it needs a touch-up, time and price, with "Book this style" and "Try it in the Fade Lab". Below, "Fade 101" shows real photos of low, mid, high and skin fades with a gauge marking where each starts.
-- **Booking ticket.** Pick a service, a day and a free time slot. The slots follow the opening hours and the length of the service, and past times are hidden. A barber-style ticket with a number and barcode fills in as you go, then gets stamped when sent:
+- **Booking page (`book.html`).** Every "Book" button opens a fast, phone-first page: service, day, time, name and phone, with a summary bar fixed at the bottom. It arrives with the choice already made from the price list (`?s=fade`), a style guide (`?look=skin`) or the Fade Lab (`?fade=mid&top=30&beard=short&x=lineup`). Each pick moves you to the next step, slots follow the opening hours and the service length, and a confirmation card with a request number appears after sending:
   - If a WhatsApp number is set, the request opens in WhatsApp with the message written out.
   - Otherwise the message is copied and Instagram DMs open (`ig.me/m/privehairstudioks`), so booking works with only the Instagram account.
 - **Hours dial.** A 24-hour clock shows each day's opening hours and the current time in Kosovo. The header shows whether the studio is open right now.
@@ -43,11 +43,14 @@ The Fade Lab and the style catalogue use free stock photos as illustrative examp
 ## Files
 
 ```
-index.html        page structure (Albanian text)
-css/styles.css    all styling
+index.html        main page (Albanian text)
+book.html         booking page
+css/styles.css    main page styling
+css/book.css      booking page styling
 js/config.js      shop details, prices, hours
 js/i18n.js        English text + runtime strings
-js/main.js        everything else
+js/main.js        main page
+js/book.js        booking page
 ```
 
 ## Running and publishing
