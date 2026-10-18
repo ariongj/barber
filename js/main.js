@@ -597,6 +597,13 @@
   }
   function setupSheet() {
     const sheet = $("#sheet");
+    // a guide photo that fails shows the striped name panel instead
+    sheet.addEventListener("error", (e) => {
+      const img = e.target;
+      if (img.tagName !== "IMG" || !sheetId) return;
+      img.parentElement.querySelector(".look__credit")?.remove();
+      img.outerHTML = placeholder(lookById(sheetId));
+    }, true);
     sheet.addEventListener("click", (e) => {
       if (e.target.closest("[data-close]")) return closeSheet();
       const step = e.target.closest("[data-sheet-step]");
@@ -663,6 +670,8 @@
       renderLooks();
       kick();
     });
+    // a Fade 101 photo that fails leaves the dark panel with its gauge
+    $("#fade101").addEventListener("error", (e) => { if (e.target.tagName === "IMG") e.target.remove(); }, true);
     $("#fade101").addEventListener("click", (e) => {
       const b = e.target.closest("[data-fade101]");
       if (!b) return;
